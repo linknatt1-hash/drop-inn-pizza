@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheDropInn Pizza Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f4f1ea; /* Cardboard-ish warm off-white */
+            --bg-card: #ffffff;
+            --text-main: #2c2520;
+            --text-muted: #554c44;
+            --accent: #da291c; /* Classic Chicago Pizza Box Red */
+            --accent-light: #fbeae9;
+            --secondary: #00843D; /* Classic Pizza Box Green */
+            --border: #e2dcd1;
+            --success: #15803d;
+            --error: #b91c1c;
+            --info-bg: #edf7ed;
+            --info-border: #00843D;
+            --info-text: #004d23;
+            --tavern-bg: #fef2f2;
+            --tavern-border: #da291c;
+            --tavern-text: #7f1d1d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- Chicago Pizza Box Header Theme --- */
+        .chicago-box-header {
+            background-color: #fff;
+            border: 4px solid var(--accent);
+            padding: 4px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.15);
+            transform: rotate(-1deg); /* Playful slight tilt */
+        }
+        
+        .chicago-box-inner {
+            border: 2px solid var(--secondary);
+            padding: 40px 20px;
+            text-align: center;
+            background-image: radial-gradient(var(--bg-main) 1px, transparent 1px);
+            background-size: 20px 20px; /* Subtle flour dusting texture */
+        }
+
+        .chicago-box-inner .stars {
+            color: var(--accent);
+            font-size: 1.5rem;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+        }
+
+        .chicago-box-inner .delicious {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 2.2rem;
+            color: var(--accent);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .chicago-box-inner .brand {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 4.8rem;
+            color: var(--secondary);
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px #fff, 6px 6px 0px var(--accent);
+            letter-spacing: -0.02em;
+        }
+
+        .chicago-box-inner .tagline {
+            font-family: Georgia, serif;
+            font-style: italic;
+            color: var(--text-main);
+            font-size: 1.25rem;
+            margin-top: 25px;
+            font-weight: 600;
+        }
+
+        .chicago-box-inner .sub-tagline {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 900px) {
+            .layout {
+                grid-template-columns: 450px 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: #fff;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input[type="number"]:focus {
+            border-color: var(--accent);
+        }
+
+        .inline-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .flour-inventory {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            background: #faf8f5;
+        }
+
+        .flour-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .flour-checkbox input {
+            margin-top: 4px;
+            margin-right: 10px;
+            accent-color: var(--accent);
+        }
+
+        .flour-category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin: 15px 0 8px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 4px;
+        }
+        
+        .flour-category-header:first-child {
+            margin-top: 0;
+        }
+
+        .flour-category-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--secondary);
+            margin: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .toggle-cat-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .toggle-cat-btn:hover {
+            text-decoration: underline;
+        }
+
+        .flour-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .flour-name {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .flour-badge {
+            background-color: var(--accent-light);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+        }
+
+        .flour-badge h3 {
+            font-size: 1.05rem;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .error-banner {
+            background-color: #fee2e2;
+            border-left: 4px solid var(--error);
+            color: var(--error);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        
+        .info-banner {
+            background-color: var(--info-bg);
+            border-left: 4px solid var(--info-border);
+            color: var(--info-text);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .tavern-banner {
+            background-color: var(--tavern-bg);
+            border-left: 4px solid var(--tavern-border);
+            color: var(--tavern-text);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #faf8f5;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-lbl {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #f8fafc;
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #475569;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+        
+        .table-ref-row td {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .total-row td {
+            font-weight: 700;
+            color: var(--accent);
+            background-color: #fffbeb;
+            border-top: 2px solid var(--border);
+        }
+        
+        .table-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .method-timeline {
+            margin-top: 10px;
+        }
+        
+        .day-group {
+            margin-bottom: 30px;
+        }
+        
+        .day-header {
+            background-color: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .day-header::before {
+            content: '🗓️';
+            margin-right: 8px;
+        }
+
+        .phase {
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 24px;
+            border-left: 2px solid var(--border);
+            margin-left: 10px;
+        }
+
+        .phase::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .phase-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+        
+        .phase-time {
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .phase-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: justify;
+        }
+
+        .alert-box {
+            background-color: #edf7ed;
+            border: 1px dashed #00843D;
+            color: #004d23;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="chicago-box-header">
+        <div class="chicago-box-inner">
+            <div class="stars">✶ ✶ ✶ ✶</div>
+            <div class="brand">The Drop Inn</div>
+            <div class="delicious">Pizza Dough Lab</div>
+            <div class="stars">✶ ✶ ✶ ✶</div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <!-- Input Sidebar Controls -->
+        <div class="panel">
+            <div class="panel-title">Calculator Parameters</div>
+            
+            <div class="form-group">
+                <label>Pizza Style Target</label>
+                <select id="pizzaStyle">
+                    <option value="neapolitan">Neapolitan</option>
+                    <option value="tavern">Chicago Tavern Style</option>
+                    <option value="detroit">Detroit-Style</option>
+                    <option value="ny">New York Style</option>
+                    <option value="focaccia">Focaccia</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Flour Inventory (Select all available flours)</label>
+                <div class="flour-inventory" id="inventoryContainer">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Oven Setup</label>
+                <select id="ovenType">
+                    <option value="pizza">High-Heat Pizza Oven (Gozney/Ooni)</option>
+                    <option value="home">Home Oven (Standard Bake)</option>
+                    <option value="convection">Home Oven (Convection/Fan)</option>
+                </select>
+            </div>
+            
+            <div class="inline-group">
+                <div class="form-group">
+                    <label>Max Oven Temp</label>
+                    <select id="maxTemp">
+                        <!-- Loaded dynamically based on ovenType -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Stone / Thermal Mass</label>
+                    <select id="stoneType">
+                         <!-- Loaded dynamically based on ovenType -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="inline-group">
+                <div class="form-group">
+                    <label>Yeast Variant</label>
+                    <select id="yeastType">
+                        <option value="ADY">Active Dry (ADY)</option>
+                        <option value="IDY">Instant Dry (IDY)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Altitude Profile</label>
+                    <select id="altitude">
+                        <option value="high" selected>High Altitude (6,300+ ft)</option>
+                        <option value="sea">Sea Level</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="standardDateInputs" class="inline-group">
+                <div class="form-group">
+                    <label>Dough Start Date</label>
+                    <select id="startDate"></select>
+                </div>
+                <div class="form-group">
+                    <label>Bake Date</label>
+                    <select id="cookingDate"></select>
+                </div>
+            </div>
+            
+            <div id="detroitTimeInputs" class="inline-group hidden">
+                <div class="form-group">
+                    <label>Earliest Available Start Time</label>
+                    <select id="detroitStartTime"></select>
+                </div>
+                <div class="form-group">
+                    <label>Target Bake Time</label>
+                    <select id="detroitBakeTime"></select>
+                </div>
+            </div>
+
+            <div class="inline-group">
+                <div class="form-group">
+                    <label>Target Diameter</label>
+                    <select id="diameter">
+                        <!-- Loaded dynamically via JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pizza Quantity (Count)</label>
+                    <input type="number" id="ballCount" value="3" min="1" max="50">
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Output Dashboard -->
+        <div class="panel">
+            <div class="panel-title">Formula Breakdown &amp; Execution Strategy</div>
+            
+            <div id="errorView" class="error-banner hidden"></div>
+            
+            <div id="resultsView">
+                <div class="flour-badge" id="flourSelectionBadge">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+                
+                <div id="homeOvenAlert" class="info-banner hidden">
+                    <strong>Neo-Neapolitan Adjustment:</strong> Home oven constraints detected. Automatically injecting 2% Olive Oil and 1% Sugar to assist dough browning and prevent moisture blowout over longer bake times.
+                </div>
+
+                <div id="tavernAlert" class="tavern-banner hidden">
+                    <strong>Tavern Style Engaged:</strong> Math engine switched to fixed baker's percentages. Curing process requires rolling paper thin and leaving uncovered to dehydrate overnight. 
+                </div>
+
+                <div id="altitudeAlert" class="info-banner hidden"></div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-val" id="calcHydration">--</div>
+                        <div class="stat-lbl">Calculated Hydration</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" id="calcHours">--</div>
+                        <div class="stat-lbl">Fermentation Window</div>
+                    </div>
+                </div>
+
+                <div class="table-title">🥖 Main Dough Formula</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Baker's %</th>
+                            <th>Mass (Grams)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="formulaTableBody">
+                        <!-- Loaded dynamically via JS -->
+                    </tbody>
+                </table>
+
+                <div id="cheeseComponentsContainer">
+                    <div class="table-title">🧀 Cheese Allocation (Per Pizza/Pan)</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Mass (Grams)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cheeseTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="panel-title" style="margin-top: 40px; font-size: 1.15rem;">Method Execution Steps</div>
+                <div class="method-timeline" id="methodTimeline">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Comprehensive Flour Database
+    const flourDatabase = [
+        // 00 Flours
+        { id: "cm_00_norm", category: "00", brand: "Central Milling", name: "Organic Type 00 Normal Flour", protein: 11.5, ash: 0.55, w: 290, neo_score: 9, tav_score: 4, det_score: 6, ny_score: 5, foc_score: 5, notes: "Variety: Organic Hard Red Winter Wheat. Treatment: None." },
+        { id: "cm_00_tg", category: "00", brand: "Central Milling", name: "Tony Gemignani 'California Artisan' 00", protein: 15.0, ash: 0.55, w: 395, neo_score: 10, tav_score: 3, det_score: 7, ny_score: 6, foc_score: 6, notes: "High protein backbone. Treatment: Ascorbic Acid, Vital Wheat Gluten, Malted." },
+        { id: "cap_00_piz", category: "00", brand: "Antimo Caputo", name: "Pizzeria 00 (Blue Bag)", protein: 12.5, ash: 0.50, w: 260, neo_score: 8, tav_score: 2, det_score: 5, ny_score: 4, foc_score: 4, notes: "The gold standard for wood-fired Neapolitan. High elasticity." },
+        { id: "cap_00_chf", category: "00", brand: "Antimo Caputo", name: "Chef/Cuoco 00 (Red Bag)", protein: 13.0, ash: 0.50, w: 320, neo_score: 7, tav_score: 3, det_score: 6, ny_score: 5, foc_score: 5, notes: "Stronger gluten matrix, perfect for longer slow ferments." },
+        { id: "ka_00", category: "00", brand: "King Arthur", name: "00 Pizza Flour", protein: 11.5, ash: 0.50, w: 0, neo_score: 6, tav_score: 4, det_score: 6, ny_score: 5, foc_score: 5, notes: "Domestic 00, optimized for high heat ovens." },
+        
+        // Bread Flours
+        { id: "cm_bread_org", category: "bread", brand: "Central Milling", name: "Organic Bread Flour", protein: 11.5, ash: 0.60, w: 0, neo_score: 6, tav_score: 6, det_score: 10, ny_score: 10, foc_score: 10, notes: "Varieties: Organic Hard Red Winter & Hard Red Spring Wheat. Malted." },
+        { id: "cm_bread_ow", category: "bread", brand: "Central Milling", name: "Old-World Bread Flour", protein: 12.5, ash: 0.80, w: 0, neo_score: 5, tav_score: 4, det_score: 9, ny_score: 9, foc_score: 9, notes: "Variety: Organic Hard Red Spring Wheat. High ash profile." },
+        { id: "ka_bread", category: "bread", brand: "King Arthur", name: "Bread Flour", protein: 12.7, ash: 0.50, w: 0, neo_score: 7, tav_score: 5, det_score: 8, ny_score: 8, foc_score: 8, notes: "Excellent unbleached spring wheat structural flour." },
+        { id: "brm_bread", category: "bread", brand: "Bob's Red Mill", name: "Artisan Bread Flour", protein: 12.5, ash: 0.52, w: 0, neo_score: 7, tav_score: 5, det_score: 7, ny_score: 7, foc_score: 7, notes: "Malted barley flour enhanced structural matrix." },
+        
+        // AP Flours
+        { id: "cm_ap_org", category: "ap", brand: "Central Milling", name: "Organic AP", protein: 10.5, ash: 0.55, w: 0, neo_score: 4, tav_score: 10, det_score: 5, ny_score: 5, foc_score: 5, notes: "Treatment: Malted with Organic Malted Barley Flour." },
+        { id: "ka_ap", category: "ap", brand: "King Arthur", name: "All-Purpose Flour", protein: 11.7, ash: 0.48, w: 0, neo_score: 5, tav_score: 8, det_score: 6, ny_score: 6, foc_score: 6, notes: "Consistent unbleached hard red winter wheat profile." }, 
+        { id: "brm_ap", category: "ap", brand: "Bob's Red Mill", name: "All-Purpose Flour", protein: 11.8, ash: 0.50, w: 0, neo_score: 6, tav_score: 7, det_score: 6, ny_score: 6, foc_score: 6, notes: "Unbleached premium baking flour baseline." },
+        { id: "ks_ap", category: "ap", brand: "Kirkland Signature", name: "Organic AP Flour", protein: 11.5, ash: 0.50, w: 0, neo_score: 5, tav_score: 9, det_score: 5, ny_score: 5, foc_score: 5, notes: "Reliable bulk AP flour, great for tender tavern crusts." }
+    ];
+
+    // Tavern JSON Data implementation
+    const tavernRecipeData = {
+        bakers_percentages: { flour: 100, water: 52, yeast_ady: 0.29, oil: 10, salt: 2.22, sugar: 2.22 },
+        base_yield_pizzas: 3,
+        base_diameter_inch: 14,
+        base_dough_ball_g: 375,
+        ingredients_by_component: {
+            toppings_per_pizza: [
+                { item: "Low-Moisture Whole-Milk Mozzarella (shredded)", mass_g: 225 },
+                { item: "Pecorino Romano or Parmesan (grated)", mass_g: 20 }
+            ]
+        },
+        timeline_steps: [
+            { step_id: 1, phase: "Phase 1: Yeast Wakeup & Dough Build", target_day_offset: -1, time: "05:30 PM", title: "Activate Yeast & Autolyse", desc: "Bloom yeast in warm water (105°F) with sugar for 10 mins until frothy. Whisk dry ingredients in mixer, add liquids, mix 90 seconds on low until shaggy. Cover and rest for 30 minutes to autolyse." },
+            { step_id: 2, phase: "Phase 1: Yeast Wakeup & Dough Build", target_day_offset: -1, time: "06:10 PM", title: "Develop Gluten & Bulk Rise", desc: "Knead on Speed 2 for 5 minutes (or 7 minutes by hand) until dough forms a tight, satin ball. Divide into spheres, place in greased containers, and sit at room temperature to proof." },
+            { step_id: 3, phase: "Phase 2: Sheet & Counter-Cure", target_day_offset: -1, time: "09:00 PM", title: "Roll and Dehydrate", desc: "Roll dough balls into paper-thin disks on a floured counter. Dock heavily with a fork or pastry docker. Transfer onto parchment paper sheets and leave completely uncovered flat on the counter overnight. This is crucial for the cracker-crust texture." },
+            { step_id: 4, phase: "Phase 3: Pause Desiccation & Relax", target_day_offset: 0, time: "06:30 AM", title: "Vapor-Lock Holding Pattern", desc: "Verify skins feel dry and leather-like. Stack the parchment-backed skins on a sheet pan, wrap the entire pan tightly with several layers of plastic wrap, and keep at room temp. This stops further drying and relaxes gluten." },
+            { step_id: 5, phase: "Phase 4: Cheese Shred", target_day_offset: 0, time: "04:30 PM", title: "Topping Prep", desc: "Shred whole-milk mozzarella block and prepare any other desired toppings." },
+            { step_id: 6, phase: "Phase 5: Firing the Tavern Pizza", target_day_offset: 0, time: "05:30 PM", title: "Ignite Oven", desc: "DYNAMIC_OVEN_TEXT" },
+            { step_id: 7, phase: "Phase 5: Firing the Tavern Pizza", target_day_offset: 0, time: "06:30 PM", title: "Assemble, Launch & Bake", desc: "Invert dough skin onto cornmeal-dusted wooden peel (dry, leathery side facing down). Sauce edge-to-edge, layer cheeses, and add toppings. Launch directly onto stone deck. Bake dynamically until cheese leopard-spots and edges blister." }
+        ]
+    };
+
+    const defaultCheckedIds = ["cm_00_tg", "cm_bread_org", "cm_ap_org"];
+    const baseDate = new Date(); 
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    // Format helpers
+    function getFormattedDate(dateObj) {
+        return `${daysOfWeek[dateObj.getDay()]}, ${months[dateObj.getMonth()]} ${dateObj.getDate()}`;
+    }
+
+    function populateDateDropdowns() {
+        const startSelect = document.getElementById("startDate");
+        const cookSelect = document.getElementById("cookingDate");
+        
+        for (let i = 0; i < 10; i++) {
+            let futureDate = new Date(baseDate.getTime());
+            futureDate.setDate(baseDate.getDate() + i);
+            let dateStr = getFormattedDate(futureDate);
+            
+            startSelect.add(new Option(dateStr, i));
+            cookSelect.add(new Option(dateStr, i));
+        }
+        
+        startSelect.value = 0;
+        cookSelect.value = 2; // Default 48-60 hr for Neapolitan
+        
+        // Populate Detroit hourly inputs
+        const dStartSelect = document.getElementById("detroitStartTime");
+        const dBakeSelect = document.getElementById("detroitBakeTime");
+        for (let i = 6; i <= 22; i++) {
+            let ampm = i >= 12 ? "PM" : "AM";
+            let displayH = i % 12 || 12;
+            let timeStr = `${displayH}:00 ${ampm}`;
+            dStartSelect.add(new Option(timeStr, i));
+            dBakeSelect.add(new Option(timeStr, i));
+        }
+        dStartSelect.value = 11; // Default 11 AM
+        dBakeSelect.value = 18; // Default 6 PM
+    }
+
+    function renderFlourInventory() {
+        const container = document.getElementById("inventoryContainer");
+        container.innerHTML = "";
+        
+        const categories = [
+            { id: "00", title: "00 Flours (Fine Milled / Pizza)" },
+            { id: "bread", title: "Bread Flours (High Protein)" },
+            { id: "ap", title: "All-Purpose Flours" }
+        ];
+
+        categories.forEach(cat => {
+            const catFlours = flourDatabase.filter(f => f.category === cat.id);
+            if (catFlours.length === 0) return;
+
+            const headerContainer = document.createElement("div");
+            headerContainer.className = "flour-category-header";
+            
+            const header = document.createElement("div");
+            header.className = "flour-category-title";
+            header.innerText = cat.title;
+            
+            const toggleBtn = document.createElement("button");
+            toggleBtn.className = "toggle-cat-btn";
+            toggleBtn.type = "button";
+            toggleBtn.innerText = "Toggle All";
+            toggleBtn.onclick = () => toggleCategory(cat.id);
+
+            headerContainer.appendChild(header);
+            headerContainer.appendChild(toggleBtn);
+            container.appendChild(headerContainer);
+
+            catFlours.forEach(f => {
+                const label = document.createElement("label");
+                label.className = "flour-checkbox";
+                const checkedAttr = defaultCheckedIds.includes(f.id) ? "checked" : "";
+                
+                label.innerHTML = `
+                    <input type="checkbox" value="${f.id}" data-category="${cat.id}" ${checkedAttr} onchange="calculateFormula()">
+                    <div class="flour-details">
+                        <span class="flour-name">[${f.brand}] ${f.name}</span><br>
+                        Protein: ${f.protein}% | Ash: ${f.ash}% ${f.w > 0 ? `| W: ${f.w}` : ''}
+                    </div>
+                `;
+                container.appendChild(label);
+            });
+        });
+    }
+
+    function toggleCategory(catId) {
+        const checkboxes = document.querySelectorAll(`input[data-category='${catId}']`);
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+        });
+        
+        calculateFormula();
+    }
+
+    function rebuildOvenDropdown() {
+        const style = document.getElementById("pizzaStyle").value;
+        const ovenEl = document.getElementById("ovenType");
+        const currentVal = ovenEl.value;
+        
+        ovenEl.innerHTML = "";
+        
+        // Remove high-heat pizza oven option if Detroit or Focaccia style is selected
+        if (style !== "detroit" && style !== "focaccia") {
+            ovenEl.add(new Option("High-Heat Pizza Oven (Gozney/Ooni)", "pizza"));
+        }
+        ovenEl.add(new Option("Home Oven (Standard Bake)", "home"));
+        ovenEl.add(new Option("Home Oven (Convection/Fan)", "convection"));
+        
+        // Restore previous selection if still valid, otherwise default to first available
+        let found = Array.from(ovenEl.options).some(opt => opt.value === currentVal);
+        if (found) {
+            ovenEl.value = currentVal;
+        } else {
+            ovenEl.value = ovenEl.options[0].value;
+        }
+        
+        updateOvenOptions();
+    }
+
+    function updateOvenOptions() {
+        const oven = document.getElementById("ovenType").value;
+        const tempSelect = document.getElementById("maxTemp");
+        const stoneSelect = document.getElementById("stoneType");
+        
+        tempSelect.innerHTML = "";
+        stoneSelect.innerHTML = "";
+        
+        if (oven === "pizza") {
+            tempSelect.add(new Option("1000°F+", "1000"));
+            stoneSelect.add(new Option("Thick Pizza Stone", "thick_stone"));
+        } else {
+            tempSelect.add(new Option("550°F", "550"));
+            tempSelect.add(new Option("525°F", "525"));
+            tempSelect.add(new Option("500°F", "500"));
+            tempSelect.add(new Option("475°F", "475"));
+            tempSelect.add(new Option("450°F", "450"));
+            
+            stoneSelect.add(new Option("1/4\" Baking Steel", "steel_14"));
+            stoneSelect.add(new Option("1/8\" Baking Steel", "steel_18"));
+            stoneSelect.add(new Option("Standard Pizza Stone", "standard_stone"));
+        }
+    }
+
+    function updateDiameterOptions() {
+        const style = document.getElementById("pizzaStyle").value;
+        const diamSelect = document.getElementById("diameter");
+        const currentVal = diamSelect.value;
+        
+        diamSelect.innerHTML = "";
+        
+        if (style === "neapolitan") {
+            diamSelect.add(new Option('10" Pizza', "10"));
+            diamSelect.add(new Option('12" Pizza', "12"));
+        } else if (style === "tavern") {
+            diamSelect.add(new Option('10" Pizza', "10"));
+            diamSelect.add(new Option('12" Pizza', "12"));
+            diamSelect.add(new Option('14" Pizza (Standard Tavern)', "14"));
+            diamSelect.add(new Option('16" Pizza', "16"));
+            diamSelect.add(new Option('18" Pizza', "18"));
+        } else if (style === "detroit" || style === "focaccia") {
+            diamSelect.add(new Option('9"x12" Pan (Original Spec)', "9x12"));
+            diamSelect.add(new Option('9"x13" Quarter Sheet', "9x13"));
+            diamSelect.add(new Option('10"x14" Detroit Pan', "10x14"));
+            diamSelect.add(new Option('13"x18" Half Sheet Pan', "13x18"));
+            diamSelect.add(new Option('10" Cast Iron Skillet', "10"));
+            diamSelect.add(new Option('12" Cast Iron Skillet', "12"));
+        } else if (style === "ny") {
+            diamSelect.add(new Option('10" Pizza', "10"));
+            diamSelect.add(new Option('12" Pizza', "12"));
+            diamSelect.add(new Option('14" Pizza', "14"));
+            diamSelect.add(new Option('16" Pizza (Pizza Screen)', "16"));
+            diamSelect.add(new Option('18" Pizza (Pizza Screen)', "18"));
+        }
+
+        // Restore selection if valid, else set defaults
+        let found = Array.from(diamSelect.options).some(opt => opt.value === currentVal);
+        if (found) {
+            diamSelect.value = currentVal;
+        } else {
+            if (style === "neapolitan") diamSelect.value = "12";
+            else if (style === "tavern") diamSelect.value = "14";
+            else if (style === "detroit") diamSelect.value = "10x14";
+            else if (style === "focaccia") diamSelect.value = "10x14";
+            else if (style === "ny") diamSelect.value = "18";
+        }
+    }
+    
+    function toggleDateInputs() {
+        const style = document.getElementById("pizzaStyle").value;
+        if (style === "detroit" || style === "focaccia") {
+            document.getElementById("standardDateInputs").classList.add("hidden");
+            document.getElementById("detroitTimeInputs").classList.remove("hidden");
+        } else {
+            document.getElementById("standardDateInputs").classList.remove("hidden");
+            document.getElementById("detroitTimeInputs").classList.add("hidden");
+        }
+    }
+
+    function calculateFormula() {
+        const errorView = document.getElementById("errorView");
+        const resultsView = document.getElementById("resultsView");
+        
+        const checkedBoxes = document.querySelectorAll("#inventoryContainer input:checked");
+        if (checkedBoxes.length === 0) {
+            errorView.innerText = "Error: Please check at least one flour in your inventory setup to process.";
+            errorView.classList.remove("hidden");
+            resultsView.classList.add("hidden");
+            return;
+        }
+
+        const pizzaStyle = document.getElementById("pizzaStyle").value;
+
+        let selectedFlour = null;
+        let maxScore = -1;
+        checkedBoxes.forEach(cb => {
+            let flour = flourDatabase.find(f => f.id === cb.value);
+            let score = 0;
+            if (pizzaStyle === "tavern") score = flour.tav_score;
+            else if (pizzaStyle === "detroit") score = flour.det_score;
+            else if (pizzaStyle === "ny") score = flour.ny_score;
+            else if (pizzaStyle === "focaccia") score = flour.foc_score;
+            else score = flour.neo_score;
+            
+            if (flour && score > maxScore) {
+                maxScore = score;
+                selectedFlour = flour;
+            }
+        });
+
+        const startIndex = parseInt(document.getElementById("startDate").value);
+        let cookIndex = parseInt(document.getElementById("cookingDate").value);
+        
+        let timeDeltaDays = cookIndex - startIndex;
+        
+        if (pizzaStyle === "tavern") {
+            if (timeDeltaDays < 1) {
+                errorView.innerText = "Tavern Curing Error: Chicago Tavern style requires an overnight counter-cure. Your earliest Start Date must be at least 1 day prior to your Cooking Date.";
+                errorView.classList.remove("hidden");
+                resultsView.classList.add("hidden");
+                return;
+            }
+            // Tavern process schedules strictly backwards from the cooking date. 
+            // We override delta days to map correctly to its 24-hour cycle.
+            timeDeltaDays = 1; 
+        } else if (pizzaStyle === "neapolitan") {
+            if (timeDeltaDays < 0) {
+                errorView.innerText = "Configuration Error: Target Cooking Date cannot precede the Dough Start Date.";
+                errorView.classList.remove("hidden");
+                resultsView.classList.add("hidden");
+                return;
+            }
+        }
+        
+        errorView.classList.add("hidden");
+        resultsView.classList.remove("hidden");
+
+        let totalHours = timeDeltaDays === 0 ? 8 : timeDeltaDays * 24;
+
+        // Base Variable Grabs
+        const altitude = document.getElementById("altitude").value;
+        const yeastType = document.getElementById("yeastType").value;
+        const ovenType = document.getElementById("ovenType").value;
+        const ballCount = parseInt(document.getElementById("ballCount").value) || 1;
+        const diamVal = document.getElementById("diameter").value;
+
+        if (pizzaStyle === "neapolitan") {
+            calculateNeapolitan(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex);
+        } else if (pizzaStyle === "tavern") {
+            calculateTavern(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex);
+        } else if (pizzaStyle === "ny") {
+            calculateNY(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex);
+        } else {
+            const startH = parseInt(document.getElementById("detroitStartTime").value);
+            const bakeH = parseInt(document.getElementById("detroitBakeTime").value);
+            let availHours = bakeH - startH;
+            
+            if (availHours < 2) {
+                errorView.innerText = "Timing Error: Same-day pan styles require a minimum of 2 hours for mixing, proofing, and baking. Please adjust your start or bake times.";
+                errorView.classList.remove("hidden");
+                resultsView.classList.add("hidden");
+                return;
+            }
+            
+            if (pizzaStyle === "detroit") {
+                calculateDetroit(selectedFlour, altitude, yeastType, ovenType, ballCount, diamVal, startH, bakeH, availHours);
+            } else if (pizzaStyle === "focaccia") {
+                calculateFocaccia(selectedFlour, altitude, yeastType, ovenType, ballCount, diamVal, startH, bakeH, availHours);
+            }
+        }
+    }
+
+    function calculateFocaccia(selectedFlour, altitude, yeastType, ovenType, ballCount, diamVal, startH, bakeH, availHours) {
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        homeAlert.classList.add("hidden");
+        document.getElementById("cheeseComponentsContainer").classList.add("hidden");
+        tavernAlert.classList.add("hidden");
+
+        let area = 0;
+        let labelSize = diamVal;
+        if (diamVal === "9x12") {
+            area = 9 * 12;
+        } else if (diamVal === "9x13") {
+            area = 9 * 13;
+        } else if (diamVal === "10x14") {
+            area = 10 * 14;
+        } else if (diamVal === "13x18") {
+            area = 13 * 18;
+        } else {
+            const d = parseInt(diamVal);
+            area = Math.PI * (d / 2) * (d / 2);
+            labelSize = d + '"';
+        }
+
+        // Focaccia Target Density Factor (Recalibrated so 10x14 pan yields exactly ~432g flour)
+        const gramsPerSqIn = 5.83; 
+        const calculatedBallWeight = Math.round(area * gramsPerSqIn);
+
+        let idealHours = 5.0; // Optimal target for Focaccia bulk + pan proof
+        let actualHours = availHours >= idealHours ? idealHours : availHours;
+        let scheduleStartH = bakeH - actualHours;
+
+        let hydrationCalculated = 73.0; // Sea Level Base
+        // Base Sea-Level IDY perfectly scaled so 4-hr High-Alt ADY matches 4.5g baseline
+        let yeastPct = (idealHours / actualHours) * 0.85; 
+        let saltPct = 2.5; 
+        let oilPct = 5.0; 
+        let sugarPct = 1.4;
+
+        if (altitude === "high") {
+            hydrationCalculated += 5.88; // Hydration Modifier +5.88%
+            yeastPct = yeastPct * 0.78; // Leavening Modifier -22%
+            altAlert.innerHTML = `<strong>Altitude Environmental Offset Applied:</strong> Hydration boosted by +5.88% (to ${hydrationCalculated.toFixed(2)}%) to combat dry mountain air. Yeast systematically reduced by 22% to prevent structural blowout during proofing. Oven targets automatically increased by 25°F.`;
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+
+        if (yeastType === "ADY") yeastPct *= 1.25;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let scaleLossFactor = 1.0; // No buffer
+        let totalTargetMass = rawDoughMass * scaleLossFactor;
+
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + sugarPct;
+        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let sugarGrams = flourGrams * (sugarPct / 100);
+
+        updateDashboardHeader(selectedFlour, hydrationCalculated, availHours);
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Pan)`, calculatedBallWeight);
+        appendRow(tableBody, `Flour (${selectedFlour.brand} ${selectedFlour.name})`, "100.00%", flourGrams);
+        
+        let warmBloomWater = flourGrams * 0.20; 
+        let coldMainWater = totalWaterGrams - warmBloomWater;
+
+        if (yeastType === "ADY") {
+            appendRow(tableBody, "Warm Water (100°F-105°F Bloom Pool)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
+            appendRow(tableBody, "Main Mix Water", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
+        } else {
+            appendRow(tableBody, "Water (Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Kosher Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        appendRow(tableBody, "Granulated Sugar", `${sugarPct.toFixed(2)}%`, sugarGrams);
+        appendRow(tableBody, "Extra Virgin Olive Oil (For Dough)", `${oilPct.toFixed(2)}%`, oilGrams);
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct.toFixed(2)}%`, yeastGrams);
+        
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + sugarGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        renderFocacciaTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, sugarGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude);
+    }
+
+    function renderFocacciaTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, sugarGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude) {
+        const timeline = document.getElementById("methodTimeline");
+        timeline.innerHTML = "";
+
+        let container = document.createElement("div");
+        container.className = "day-group";
+        
+        let headerText = "Same-Day Focaccia Process & Bake";
+        container.innerHTML = `<div class="day-header">${headerText}</div>`;
+        
+        let phase1Text = "";
+        if (yeastType === "ADY") {
+            phase1Text = `Whisk the Granulated Sugar (${sugarGrams.toFixed(1)}g) and Active Dry Yeast (${yeastGrams.toFixed(2)}g) into the Warm Water pool (${warmBloomWater.toFixed(1)}g strictly at 100°F-105°F). Allow to sit undisturbed for 10 minutes to bloom.`;
+        } else {
+            phase1Text = `Whisk the Instant Dry Yeast (${yeastGrams.toFixed(2)}g) directly into the dry flour. Dissolve the Granulated Sugar (${sugarGrams.toFixed(1)}g) into your water.`;
+        }
+        
+        let timeAlert = "";
+        if (availHours > idealHours) {
+            timeAlert = `<div class="alert-box"><strong>Timing Note:</strong> You indicated an availability of ${availHours} hours, but this recipe is optimized for ${idealHours} hours. You do not need to start right away. Wait until ${formatTime(scheduleStartH)} to begin Phase 1.</div>`;
+        } else if (availHours < idealHours) {
+            timeAlert = `<div class="alert-box"><strong>Accelerated Schedule:</strong> You indicated only ${availHours} hours available. The calculator has automatically increased the yeast to ${yeastGrams.toFixed(2)}g to accelerate fermentation and fit your window. Start immediately at ${formatTime(scheduleStartH)}.</div>`;
+        } else {
+            timeAlert = `<div class="alert-box"><strong>Optimal Schedule:</strong> You have precisely the ideal ${idealHours} hour window. Start Phase 1 at ${formatTime(scheduleStartH)}.</div>`;
+        }
+        
+        let bulkHours = (actualHours * 0.40).toFixed(1);
+        let panHours = (actualHours * 0.50).toFixed(1);
+
+        // Thermal Processing Settings
+        let bakeTemp = (altitude === "high") ? "450°F" : "425°F";
+        let ovenMode = (altitude === "high") ? "True Convection" : "Convection (if available)";
+        let bakeTime = "16 minutes";
+
+        container.innerHTML += `
+            ${timeAlert}
+            <div class="phase">
+                <div class="phase-time">${formatTime(scheduleStartH)}</div>
+                <div class="phase-title">Phase 1: Yeast Activation & Hydration</div>
+                <div class="phase-text">${phase1Text} Combine the flour, Kosher Salt (${saltGrams.toFixed(1)}g), Main Water (${coldMainWater.toFixed(1)}g), and the yeast mixture. Mix until a shaggy dough forms. Cover and let rest for 15 minutes to autolyse.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(scheduleStartH + 0.25)}</div>
+                <div class="phase-title">Phase 2: Oil Incorporation & Folds</div>
+                <div class="phase-text">Pour the Extra Virgin Olive Oil (${oilGrams.toFixed(1)}g) over the dough. Dimple it in with your fingers, then squeeze and fold the dough until the oil is completely absorbed. Perform 3 sets of "Stretch and Folds" spaced 15 minutes apart to build structural strength.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(scheduleStartH + 1.0)}</div>
+                <div class="phase-title">Phase 3: Bulk Fermentation</div>
+                <div class="phase-text">Transfer the dough to a lightly oiled bulk container. Let the dough rest covered at room temperature for roughly ${bulkHours} hours until deeply bubbly and doubled in volume.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(scheduleStartH + 1.0 + parseFloat(bulkHours))}</div>
+                <div class="phase-title">Phase 4: Pan Transfer & Final Rise</div>
+                <div class="phase-text">Pour a generous slick of olive oil (2-3 tablespoons, unmeasured) into your ${diamVal} heavy pan/skillet. Gently transfer the dough into the pan. Coat the top with oil. If it resists stretching to the corners, let it rest 20 minutes and try again. Cover and proof at room temperature for roughly ${panHours} hours until the dough is wildly bubbly and jiggles when shaken.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(bakeH - 0.75)}</div>
+                <div class="phase-title">Phase 5: Oven Pre-Heat</div>
+                <div class="phase-text">Preheat oven to ${bakeTemp} on ${ovenMode} mode for a minimum of 45 minutes to saturate the cavity.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(bakeH)}</div>
+                <div class="phase-title">Phase 6: Dimpling & The Bake</div>
+                <div class="phase-text">Right before baking, pour another light drizzle of oil over the top. Oil your fingers and press firmly straight down into the dough to create deep dimples. Top with flaky sea salt. Bake for approximately ${bakeTime}, rotating the pan halfway through. The internal crumb temperature should register precisely between 205°F and 210°F. Remove from pan immediately to a wire rack.</div>
+            </div>
+        `;
+        
+        timeline.appendChild(container);
+    }
+
+    function calculateNeapolitan(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
+        // UI Toggles
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+        tavernAlert.classList.add("hidden");
+
+        let area = 0;
+        let labelSize = diamVal;
+        if (diamVal === "10x14") {
+            area = 10 * 14;
+        } else {
+            const d = parseInt(diamVal);
+            area = Math.PI * (d / 2) * (d / 2);
+            labelSize = d + '"';
+        }
+
+        const baseGramsPerSqIn = 2.21;
+        const calculatedBallWeight = Math.round(area * baseGramsPerSqIn);
+
+        let baseHydration = 63.0;
+        let proteinDeviation = selectedFlour.protein - 12.0;
+        let hydrationCalculated = baseHydration + (proteinDeviation * 1.5);
+        
+        let saltPct = 3.0; 
+        let oilPct = 0.0;
+        let sugarPct = 0.0;
+        
+        if (ovenType !== "pizza") {
+            homeAlert.classList.remove("hidden");
+            oilPct = 2.0;
+            sugarPct = 1.0;
+            hydrationCalculated += 2.0; 
+        } else {
+            homeAlert.classList.add("hidden");
+        }
+
+        if (altitude === "high") {
+            hydrationCalculated += 2.0; 
+            altAlert.innerHTML = "<strong>Altitude Adjustment:</strong> Hydration increased by +2% and yeast reduced by 20% to control fermentation rate in lower atmospheric pressure.";
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+        
+        hydrationCalculated = Math.round(hydrationCalculated * 10) / 10;
+
+        // Yeast Curve
+        let baseUnits = 0.0684 * 60;
+        let yeastPct = baseUnits / totalHours;
+        if (altitude === "high") yeastPct = yeastPct * 0.80; 
+        
+        // Convert to IDY if selected
+        if (yeastType === "IDY") yeastPct *= 0.75;
+
+        if (yeastPct > 1.0) yeastPct = 1.0;
+        if (yeastPct < 0.02) yeastPct = 0.02;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        // Mass Calculations
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let scaleLossFactor = 1.0; 
+        let totalTargetMass = rawDoughMass * scaleLossFactor;
+
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + sugarPct;
+        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let sugarGrams = flourGrams * (sugarPct / 100);
+
+        updateDashboardHeader(selectedFlour, hydrationCalculated, totalHours);
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
+        appendRow(tableBody, "Flour (System Selected Matrix)", "100.00%", flourGrams);
+
+        if (yeastType === "ADY") {
+            let warmBloomWater = totalWaterGrams * 0.084;
+            let coldMainWater = totalWaterGrams * (1 - 0.084);
+            appendRow(tableBody, "Cold Water (Main Batch Solution)", `${Math.round((100 - 8.4) * (hydrationCalculated/100) * 100)/100}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (Yeast Bloom 105°F Pool)", `${Math.round(8.4 * (hydrationCalculated/100) * 100)/100}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Cold Water (Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        
+        if (ovenType !== "pizza") {
+            appendRow(tableBody, "Extra Virgin Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+            appendRow(tableBody, "Sugar / Diastatic Malt", `${sugarPct.toFixed(2)}%`, sugarGrams);
+        }
+        
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct}%`, yeastGrams);
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + sugarGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        let neapolitanCheeseGrams = Math.round(area * 0.9);
+        appendRow(cheeseTable, "Fresh Mozzarella (Torn, Drained)", "", `${neapolitanCheeseGrams}g`, true);
+
+        renderNeapolitanTimelineText(yeastType, altitude, timeDeltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams);
+    }
+
+    function calculateTavern(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        homeAlert.classList.add("hidden");
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+
+        const tData = tavernRecipeData;
+        
+        let userArea = 0;
+        let labelSize = diamVal;
+        if (diamVal === "10x14") {
+            userArea = 10 * 14;
+        } else {
+            const d = parseInt(diamVal);
+            userArea = Math.PI * (d / 2) * (d / 2);
+            labelSize = d + '"';
+        }
+        
+        const baseArea14 = Math.PI * (7 * 7);
+        
+        // Base Tavern 14" ball = 375g. 
+        const gramsPerSqIn = tData.base_dough_ball_g / baseArea14; // ~2.436
+        const calculatedBallWeight = Math.round(userArea * gramsPerSqIn);
+
+        let hydrationCalculated = tData.bakers_percentages.water;
+        
+        // Dynamic flour adjustment for Tavern style
+        let flourAlertText = "";
+        if (selectedFlour.protein >= 12.0) {
+            hydrationCalculated += 2; // Increase hydration to offset high protein toughness in cracker crust
+            flourAlertText = ` High protein structural flour detected (${selectedFlour.protein}%). Automatically increased hydration to ${hydrationCalculated}% to ensure the matrix can be rolled paper-thin without snapping back.`;
+        }
+
+        tavernAlert.innerHTML = `<strong>Tavern Style Engaged:</strong> Math engine switched to fixed baker's percentages. Curing process requires rolling paper thin and leaving uncovered to dehydrate overnight.${flourAlertText}`;
+        tavernAlert.classList.remove("hidden");
+
+        let saltPct = tData.bakers_percentages.salt;
+        let oilPct = tData.bakers_percentages.oil; // Corn Oil
+        let sugarPct = tData.bakers_percentages.sugar;
+        let yeastPct = tData.bakers_percentages.yeast_ady;
+
+        // Altitude tweak - minor reduction for yeast if high alt
+        if (altitude === "high") {
+            yeastPct = yeastPct * 0.90;
+            altAlert.innerHTML = "<strong>Altitude Adjustment:</strong> Yeast reduced by 10% to prevent over-proofing in lower atmospheric pressure.";
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+        
+        if (yeastType === "IDY") yeastPct *= 0.75;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let scaleLossFactor = 1.0; 
+        let totalTargetMass = rawDoughMass * scaleLossFactor;
+
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + sugarPct;
+        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let sugarGrams = flourGrams * (sugarPct / 100);
+
+        updateDashboardHeader(selectedFlour, hydrationCalculated, 24); // Force 24h display for tavern process
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
+        appendRow(tableBody, "Flour", "100.00%", flourGrams);
+        
+        let warmBloomWater = 75 * (flourGrams / 675); // Scaling bloom water relative to flour
+        if (warmBloomWater > totalWaterGrams) warmBloomWater = totalWaterGrams * 0.20;
+        let coldMainWater = totalWaterGrams - warmBloomWater;
+
+        if (yeastType === "ADY") {
+            appendRow(tableBody, "Room-Temp Water (70°F Main Batch)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (100°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Water (70°F Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Granulated Sugar", `${sugarPct.toFixed(2)}%`, sugarGrams);
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        appendRow(tableBody, "Corn Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct}%`, yeastGrams);
+        
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + sugarGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const areaMultiplierPerPizza = userArea / baseArea14;
+        
+        // Cheese and Assembly is per pizza
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        tData.ingredients_by_component.toppings_per_pizza.forEach(item => {
+            let massStr = item.mass_g;
+            if (typeof massStr === "number") {
+                massStr = (massStr * areaMultiplierPerPizza).toFixed(0) + "g";
+            }
+            appendRow(cheeseTable, item.item, "", massStr, true);
+        });
+
+        renderTavernTimelineText(tData.timeline_steps, cookIndex, ovenType, yeastType, yeastGrams, warmBloomWater, saltGrams, coldMainWater);
+    }
+
+    function calculateDetroit(selectedFlour, altitude, yeastType, ovenType, ballCount, diamVal, startH, bakeH, availHours) {
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        homeAlert.classList.add("hidden");
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+        tavernAlert.classList.add("hidden");
+
+        let area = 0;
+        let labelSize = diamVal;
+        if (diamVal === "9x12") {
+            area = 9 * 12;
+        } else if (diamVal === "9x13") {
+            area = 9 * 13;
+        } else if (diamVal === "10x14") {
+            area = 10 * 14;
+        } else if (diamVal === "13x18") {
+            area = 13 * 18;
+        } else {
+            const d = parseInt(diamVal);
+            area = Math.PI * (d / 2) * (d / 2);
+            labelSize = d + '"';
+        }
+        
+        // Detroit Factor: ~3.56g per sq inch
+        const gramsPerSqIn = 3.56; 
+        const calculatedBallWeight = Math.round(area * gramsPerSqIn);
+        
+        let idealHours = 5.0; // 5 hours is the optimal target (mixing to pan proof to bake)
+        let actualHours = availHours >= idealHours ? idealHours : availHours;
+        let scheduleStartH = bakeH - actualHours;
+
+        let hydrationCalculated = 73.0; // Sea Level Base
+        
+        // Dynamically scale yeast based on actual time we are going to use
+        // If we are forcing it into 2 hours, it scales up to 2.5% (5/2 * 1.0). If 5 hours, it's 1.0%.
+        let yeastPct = (idealHours / actualHours) * 1.0;
+        
+        let saltPct = 2.0;
+        let oilPct = 2.0; 
+        let maltPct = 2.0; // Barley Malt Syrup
+
+        if (altitude === "high") {
+            hydrationCalculated = 75.0; 
+            yeastPct = yeastPct * 0.75; 
+            altAlert.innerHTML = `<strong>Altitude Adjustment:</strong> Hydration increased to 75% and yeast reduced to ${yeastPct.toFixed(2)}% to prevent pan collapse and maintain pillowy structure.`;
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+
+        if (yeastType === "IDY") yeastPct *= 0.75;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let scaleLossFactor = 1.0; 
+        let totalTargetMass = rawDoughMass * scaleLossFactor;
+
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + maltPct;
+        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let maltGrams = flourGrams * (maltPct / 100);
+
+        updateDashboardHeader(selectedFlour, hydrationCalculated, availHours);
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Pan)`, calculatedBallWeight);
+        appendRow(tableBody, "Flour", "100.00%", flourGrams);
+        
+        let warmBloomWater = flourGrams * 0.20; 
+        let coldMainWater = totalWaterGrams - warmBloomWater;
+
+        if (yeastType === "ADY") {
+            appendRow(tableBody, "Chilled Water (45°F-50°F Main Batch)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (100°F-105°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Chilled Water (45°F-50°F Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        appendRow(tableBody, "Barley Malt Syrup", `${maltPct.toFixed(2)}%`, maltGrams);
+        appendRow(tableBody, "Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct.toFixed(2)}%`, yeastGrams);
+        
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + maltGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        
+        // Detroit cheese: 2.5g per sq in total (40% Provolone Edge, 60% Mozzarella Center)
+        const detroitCheeseTotal = Math.round(area * 2.5);
+        const provoloneGrams = Math.round(detroitCheeseTotal * 0.4); 
+        const mozzGrams = detroitCheeseTotal - provoloneGrams; 
+        
+        appendRow(cheeseTable, "Provolone (Sliced thick, pressed against pan walls)", "", `${provoloneGrams}g`, true);
+        appendRow(cheeseTable, "Low-Moisture Mozzarella (Cubed, center focus)", "", `${mozzGrams}g`, true);
+
+        renderDetroitTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, maltGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude);
+    }
+
+    function calculateNY(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        homeAlert.classList.add("hidden");
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+        tavernAlert.classList.add("hidden");
+
+        let area = 0;
+        let labelSize = diamVal;
+        const d = parseInt(diamVal);
+        area = Math.PI * (d / 2) * (d / 2);
+        labelSize = d + '"';
+
+        const gramsPerSqIn = 3.001; 
+        const calculatedBallWeight = Math.round(area * gramsPerSqIn);
+
+        let hydrationCalculated = 65.0; 
+        
+        let saltPct = 2.5;
+        let oilPct = 4.1; 
+        let maltPct = 1.6;
+
+        let yeastPct = 0.43; // 24h baseline
+        
+        // Adaptive yeast scaling based on timeline selected
+        if (timeDeltaDays === 0) {
+            yeastPct = 1.0; 
+        } else if (timeDeltaDays === 1) {
+            yeastPct = 0.5;
+        } else if (timeDeltaDays === 2) {
+            yeastPct = 0.35;
+        } else {
+            yeastPct = 0.25;
+        }
+
+        if (altitude === "high") {
+            yeastPct = yeastPct * 0.8; 
+            altAlert.innerHTML = `<strong>Altitude Adjustment:</strong> Yeast reduced to ${yeastPct.toFixed(2)}% to control fermentation rate in lower atmospheric pressure.`;
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+
+        if (yeastType === "IDY") yeastPct *= 0.75;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + maltPct;
+        let flourGrams = (rawDoughMass / totalPercentageMatrix) * 100;
+        
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let maltGrams = flourGrams * (maltPct / 100);
+
+        let hasT80 = document.querySelector('input[value="cm_bread_ow"]') && document.querySelector('input[value="cm_bread_ow"]').checked;
+        
+        updateDashboardHeader(selectedFlour, hydrationCalculated, totalHours);
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
+        
+        if (hasT80) {
+            appendRow(tableBody, `Bread Flour (${selectedFlour.brand} ${selectedFlour.name})`, "80.00%", flourGrams * 0.80);
+            appendRow(tableBody, `Old-World T80 Flour (Central Milling)`, "20.00%", flourGrams * 0.20);
+        } else {
+            appendRow(tableBody, `Flour (${selectedFlour.brand} ${selectedFlour.name})`, "100.00%", flourGrams);
+        }
+        
+        let warmBloomWater = 50.0;
+        if (warmBloomWater > totalWaterGrams) warmBloomWater = totalWaterGrams * 0.2;
+        let coldMainWater = totalWaterGrams - warmBloomWater;
+
+        if (yeastType === "ADY") {
+            appendRow(tableBody, "Main Mix Water (85°F)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (100°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Water (85°F Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        appendRow(tableBody, "Barley Malt Syrup", `${maltPct.toFixed(2)}%`, maltGrams);
+        appendRow(tableBody, "Extra Virgin Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct.toFixed(2)}%`, yeastGrams);
+        
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + maltGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        
+        const totalCheeseGrams = Math.round(area * 1.44); 
+        appendRow(cheeseTable, "Low-Moisture Whole-Milk Mozzarella (Shredded)", "", `${totalCheeseGrams}g`, true);
+        appendRow(cheeseTable, "Pecorino Romano (Finely Grated, under the Mozzarella)", "", `15g`, true);
+
+        renderNYTimelineText(yeastType, altitude, timeDeltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams, maltGrams, diamVal, warmBloomWater, coldMainWater);
+    }
+
+    function renderDetroitTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, maltGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude) {
+        const timeline = document.getElementById("methodTimeline");
+        timeline.innerHTML = "";
+
+        let container = document.createElement("div");
+        container.className = "day-group";
+        
+        let headerText = "Same-Day Detroit Process & Bake";
+        container.innerHTML = `<div class="day-header">${headerText}</div>`;
+        
+        let phase1Text = "";
+        if (yeastType === "ADY") {
+            phase1Text = `Whisk the Active Dry Yeast (${yeastGrams.toFixed(2)}g) into the Warm Water pool (${warmBloomWater.toFixed(1)}g strictly at 100°F-105°F). Allow to sit undisturbed for 10 minutes to bloom.`;
+        } else {
+            phase1Text = `Whisk the Instant Dry Yeast (${yeastGrams.toFixed(2)}g) directly into the dry flour.`;
+        }
+        
+        let timeAlert = "";
+        if (availHours > idealHours) {
+            timeAlert = `<div class="alert-box"><strong>Timing Note:</strong> You indicated an availability of ${availHours} hours, but this recipe is optimized for ${idealHours} hours. Wait until ${formatTime(scheduleStartH)} to begin Phase 1.</div>`;
+        } else if (availHours < idealHours) {
+            timeAlert = `<div class="alert-box"><strong>Accelerated Schedule:</strong> You indicated only ${availHours} hours available. The calculator has automatically increased the yeast to ${yeastGrams.toFixed(2)}g to accelerate fermentation and fit your window. Start immediately at ${formatTime(scheduleStartH)}.</div>`;
+        } else {
+            timeAlert = `<div class="alert-box"><strong>Optimal Schedule:</strong> You have precisely the ideal ${idealHours} hour window. Start Phase 1 at ${formatTime(scheduleStartH)}.</div>`;
+        }
+        
+        let bulkHours = (actualHours * 0.40).toFixed(1);
+        let panHours = (actualHours * 0.50).toFixed(1);
+
+        let bakeTemp = (altitude === "high") ? "525°F" : "500°F";
+        let ovenMode = (altitude === "high") ? "True Convection" : "Convection (if available)";
+
+        container.innerHTML += `
+            ${timeAlert}
+            <div class="phase">
+                <div class="phase-time">${formatTime(scheduleStartH)}</div>
+                <div class="phase-title">Phase 1: Yeast Activation & Mixing</div>
+                <div class="phase-text">${phase1Text} Combine flour, Kosher Salt (${saltGrams.toFixed(1)}g), Malt Syrup (${maltGrams.toFixed(1)}g), Olive Oil (${oilGrams.toFixed(1)}g), and Chilled Water (${coldMainWater.toFixed(1)}g). Mix until cohesive, then knead for 5 minutes. Cover and rest for 15 minutes.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(scheduleStartH + 0.25)}</div>
+                <div class="phase-title">Phase 2: Bulk Fermentation</div>
+                <div class="phase-text">Perform one set of stretch and folds. Transfer dough to a lightly oiled bulk container. Rest covered at room temperature for roughly ${bulkHours} hours until doubled in volume.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(scheduleStartH + 0.25 + parseFloat(bulkHours))}</div>
+                <div class="phase-title">Phase 3: Pan Transfer & Proof</div>
+                <div class="phase-text">Pour 2 tablespoons of olive oil into your ${diamVal} pan. Gently transfer the dough. Press it out toward the edges. If it resists, let it rest 20 minutes and try again. Cover and proof at room temperature for roughly ${panHours} hours until the dough is wildly bubbly and fills the corners.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(bakeH - 0.75)}</div>
+                <div class="phase-title">Phase 4: Oven Pre-Heat</div>
+                <div class="phase-text">Preheat oven to ${bakeTemp} on ${ovenMode} mode for a minimum of 45 minutes to saturate the baking stone or steel.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-time">${formatTime(bakeH)}</div>
+                <div class="phase-title">Phase 5: Topping & Bake Execution</div>
+                <div class="phase-text">Line the outer edge of the pan with the sliced Provolone to build the frico crust. Cube the Mozzarella and distribute evenly across the center. Bake for 14-16 minutes. Use a metal spatula to free the cheese edge immediately after removing from the oven, and transfer to a wire cooling rack.</div>
+            </div>
+        `;
+        
+        timeline.appendChild(container);
+    }
+
+    function renderNYTimelineText(yeastType, altitude, timeDeltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams, maltGrams, diamVal, warmBloomWater, coldMainWater) {
+        const timeline = document.getElementById("methodTimeline");
+        timeline.innerHTML = "";
+        
+        let startObj = new Date(baseDate.getTime());
+        startObj.setDate(baseDate.getDate() + startIndex);
+        
+        let cookObj = new Date(baseDate.getTime());
+        cookObj.setDate(baseDate.getDate() + cookIndex);
+
+        let isSameDay = timeDeltaDays === 0;
+
+        let container = document.createElement("div");
+        container.className = "day-group";
+        container.innerHTML = `<div class="day-header">Day 1: ${getFormattedDate(startObj)} - Mixing & Dough Build</div>`;
+        
+        let phase1Text = "";
+        if (yeastType === "ADY") {
+            phase1Text = `Whisk the Active Dry Yeast (${yeastGrams.toFixed(2)}g) into the Warm Water pool (${warmBloomWater.toFixed(1)}g strictly at 100°F). Allow to sit undisturbed for 10 minutes to bloom.`;
+        } else {
+            phase1Text = `Whisk the Instant Dry Yeast (${yeastGrams.toFixed(2)}g) directly into the dry flour.`;
+        }
+        
+        let proofingText = isSameDay
+            ? `Since you selected a same-day bake, cover the dough balls and let them proof at room temperature for 3 to 4 hours until doubled in size.`
+            : `Place the lightly oiled, sealed containers directly into the refrigerator (36°F - 38°F). This cold retardation will build incredible flavor over the next ${timeDeltaDays} day(s).`;
+
+        container.innerHTML += `
+            <div class="phase">
+                <div class="phase-title">Phase 1: Yeast Activation</div>
+                <div class="phase-text">${phase1Text}</div>
+            </div>
+            <div class="phase">
+                <div class="phase-title">Phase 2: Matrix Development</div>
+                <div class="phase-text">In a mixer, combine the flour, Salt (${saltGrams.toFixed(1)}g), Olive Oil (${oilGrams.toFixed(1)}g), Malt/Sugar (${maltGrams.toFixed(1)}g), and the Cold Main Water (${coldMainWater.toFixed(1)}g). Add the yeast pool and mix on low until cohesive. Knead for 8-10 minutes until strong, smooth, and stretchy. Cover and rest for 20 minutes to relax.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-title">Phase 3: Balling & Proofing</div>
+                <div class="phase-text">Divide dough into individual unit spheres. Round them tightly, sealing the bottoms. Place in oiled containers. ${proofingText}</div>
+            </div>
+        `;
+        
+        timeline.appendChild(container);
+        
+        // BAKE DAY
+        let bakeContainer = document.createElement("div");
+        bakeContainer.className = "day-group";
+        
+        let headerDayString = isSameDay ? "Later Today" : `Day ${timeDeltaDays + 1}: ${getFormattedDate(cookObj)}`;
+        bakeContainer.innerHTML = `<div class="day-header">${headerDayString} - Baking Execution</div>`;
+        
+        if (!isSameDay) {
+            let phase4Alert = (altitude === "high") ? `<div class="alert-box">⚠️ <strong>High Altitude Environment:</strong> Keep proofing box sealed during tempering to prevent a dry leather skin from forming.</div>` : "";
+            bakeContainer.innerHTML += `
+                <div class="phase">
+                    <div class="phase-title">Phase 4: Counter Tempering</div>
+                    <div class="phase-text">Exactly 2 to 3 hours before baking, remove the dough from the fridge and place it on the counter to temper to room temperature. ${phase4Alert}</div>
+                </div>
+            `;
+        }
+        
+        const tempSelect = document.getElementById("maxTemp");
+        const stoneSelect = document.getElementById("stoneType");
+        const tempText = tempSelect.options[tempSelect.selectedIndex].text;
+        const stoneText = stoneSelect.options[stoneSelect.selectedIndex].text;
+        
+        let bakeSetup = ovenType === "pizza" 
+            ? `Ignite oven on a low ambient flame profile targeting a strict floor temperature of 650°F (343°C).` 
+            : `Preheat oven to ${tempText} with the ${stoneText} on the middle rack for a full 60 minutes.`;
+
+        let isScreen = diamVal === "16" || diamVal === "18";
+        let launchText = isScreen 
+            ? `Stretch dough to exactly ${diamVal} inches and place it onto a lightly oiled Pizza Screen. Launch the screen directly onto the stone.` 
+            : `Stretch dough to ${diamVal} inches on a wooden peel dusted with semolina. Launch directly onto the naked stone deck.`;
+            
+        let durationText = isScreen 
+            ? `Bake for 3 to 4 minutes on the screen to set the bottom structure, then use a peel to slide the pizza off the screen directly onto the naked stone for an additional 3 to 4 minutes to finish the bottom char.` 
+            : `Bake for 5 to 7 minutes (longer in home ovens), rotating dynamically for an even, foldable crust profile.`;
+
+        bakeContainer.innerHTML += `
+            <div class="phase">
+                <div class="phase-title">Phase ${isSameDay ? 4 : 5}: Thermal Prep</div>
+                <div class="phase-text">${bakeSetup}</div>
+            </div>
+            <div class="phase">
+                <div class="phase-title">Phase ${isSameDay ? 5 : 6}: The Bake Execution</div>
+                <div class="phase-text">${launchText} ${durationText}</div>
+            </div>
+        `;
+        
+        timeline.appendChild(bakeContainer);
+    }
+
+    function formatTime(hourDecimal) {
+        let h = Math.floor(hourDecimal);
+        let m = Math.round((hourDecimal - h) * 60);
+        if (m >= 60) {
+            h += 1;
+            m -= 60;
+        }
+        let ampm = (h >= 12 && h < 24) ? "PM" : "AM";
+        let displayH = h % 12;
+        if (displayH === 0) displayH = 12;
+        let displayM = m.toString().padStart(2, "0");
+        return `${displayH}:${displayM} ${ampm}`;
+    }
+
+    function updateDashboardHeader(selectedFlour, hydration, hours) {
+        document.getElementById("calcHydration").innerText = `${hydration}%`;
+        document.getElementById("calcHours").innerText = `${hours} Hours`;
+        document.getElementById("flourSelectionBadge").innerHTML = `
+            <h3>System Selected Flour: <strong>[${selectedFlour.brand}] ${selectedFlour.name}</strong></h3>
+            <p style="font-size: 0.85rem; color: #92400e;">Specs: Protein ${selectedFlour.protein}% | Ash ${selectedFlour.ash}% | ${selectedFlour.notes}</p>
+        `;
+    }
+
+    function appendRow(parent, componentName, pctStr, gramsVal, isString=false) {
+        let tr = document.createElement("tr");
+        let valStr = isString ? gramsVal : (typeof gramsVal === "number" ? gramsVal.toFixed(1) + "g" : gramsVal);
+        let pctHtml = pctStr ? `<td style="font-family: monospace;">${pctStr}</td>` : '';
+        let colSpan = pctStr ? '' : 'colspan="2"';
+        tr.innerHTML = `
+            <td>${componentName}</td>
+            ${pctHtml}
+            <td ${colSpan} style="font-weight: 600; text-align: ${pctStr ? 'left' : 'right'};">${valStr}</td>
+        `;
+        parent.appendChild(tr);
+    }
+
+    function appendRefRow(parent, label, valGrams) {
+        let tr = document.createElement("tr");
+        tr.className = "table-ref-row";
+        tr.innerHTML = `
+            <td>${label}</td>
+            <td style="font-family: monospace;">---</td>
+            <td style="font-weight: 700;">${valGrams}g</td>
+        `;
+        parent.appendChild(tr);
+    }
+
+    function appendTotalRow(parent, label, pctStr, valGrams) {
+        let tr = document.createElement("tr");
+        tr.className = "total-row";
+        tr.innerHTML = `
+            <td>${label}</td>
+            <td style="font-family: monospace;">${pctStr}</td>
+            <td>${valGrams.toFixed(1)}g</td>
+        `;
+        parent.appendChild(tr);
+    }
+
+    function renderComponentTable(tableId, dataArray, multiplier) {
+        let tbody = document.getElementById(tableId);
+        tbody.innerHTML = "";
+        dataArray.forEach(item => {
+            let scaledMass = item.total_batch_g * multiplier;
+            appendRow(tbody, item.item, "", scaledMass);
+        });
+    }
+
+    function renderNeapolitanTimelineText(yeastType, altitude, deltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams) {
+        const timeline = document.getElementById("methodTimeline");
+        timeline.innerHTML = "";
+
+        const tempSelect = document.getElementById("maxTemp");
+        const stoneSelect = document.getElementById("stoneType");
+        const tempText = tempSelect.options[tempSelect.selectedIndex].text;
+        const stoneType = stoneSelect.value;
+        const stoneText = stoneSelect.options[stoneSelect.selectedIndex].text;
+
+        let startObj = new Date(baseDate.getTime());
+        startObj.setDate(baseDate.getDate() + startIndex);
+        
+        let cookObj = new Date(baseDate.getTime());
+        cookObj.setDate(baseDate.getDate() + cookIndex);
+
+        let warmWaterVal = (totalWaterGrams * 0.084).toFixed(1);
+        let coldWaterVal = (yeastType === "ADY") ? (totalWaterGrams * (1 - 0.084)).toFixed(1) : totalWaterGrams.toFixed(1);
+
+        // DAY 1
+        let day1Container = document.createElement("div");
+        day1Container.className = "day-group";
+        day1Container.innerHTML = `<div class="day-header">Day 1: ${getFormattedDate(startObj)} - Mixing &amp; Bulk Initialization</div>`;
+        
+        let phase1Text = "";
+        let oilText = (ovenType !== "pizza") ? ` Next, drizzle in the Olive Oil (${oilGrams.toFixed(1)}g) and knead gently until completely absorbed.` : "";
+
+        if (yeastType === "ADY") {
+            phase1Text = `Isolate the Warm Water pool (${warmWaterVal}g) heated strictly to 105°F. Whisk in the Active Dry Yeast (${yeastGrams.toFixed(2)}g). Allow it to sit undisturbed for 10 minutes until frothy. Dissolve the Salt (${saltGrams.toFixed(1)}g) into the remaining ice-cold Water (${coldWaterVal}g). Stream the foaming slurry directly into the cold saline framework.`;
+        } else {
+            phase1Text = `Dissolve the Fine Sea Salt (${saltGrams.toFixed(1)}g) completely within your cold water volume (${coldWaterVal}g). Whisk the Instant Dry Yeast (${yeastGrams.toFixed(2)}g) directly into your dry flour matrix beforehand.`;
+        }
+        
+        day1Container.innerHTML += `
+            <div class="phase">
+                <div class="phase-title">Phase 1: Hydration Matrix &amp; Autolyse</div>
+                <div class="phase-text">${phase1Text} Incorporate flour until all dry pockets disappear. Cover securely and hold for a mandatory 20-minute autolyse window.</div>
+            </div>
+            <div class="phase">
+                <div class="phase-title">Phase 2: Gluten Consolidation</div>
+                <div class="phase-text">Knead smoothly for 8-10 minutes by hand until skin transitions to a satin texture.${oilText} Round into a tight sphere, rest 30 mins, then migrate to cold storage (36°F - 38°F).</div>
+            </div>
+        `;
+        timeline.appendChild(day1Container);
+
+        // INTERMEDIATE DAYS
+        if (deltaDays > 1) {
+            let interObj = new Date(startObj.getTime());
+            interObj.setDate(startObj.getDate() + 1);
+            let interContainer = document.createElement("div");
+            interContainer.className = "day-group";
+            interContainer.innerHTML = `
+                <div class="day-header">Day ${deltaDays}: ${getFormattedDate(interObj)} - Cold Development & Portioning</div>
+                <div class="phase">
+                    <div class="phase-title">Phase 3: Unit Portioning</div>
+                    <div class="phase-text">Remove bulk dough from cold storage. Precision-scale into target mass units. Roll each firmly into a taut sphere, seal seams, place inside oiled proofing tray, and return to cold storage.</div>
+                </div>
+            `;
+            timeline.appendChild(interContainer);
+        } else if (deltaDays === 1 || deltaDays === 0) {
+             let interContainer = document.createElement("div");
+             interContainer.className = "day-group";
+             interContainer.innerHTML = `
+                <div class="phase">
+                    <div class="phase-title">Phase 3: Unit Portioning</div>
+                    <div class="phase-text">Precision-scale the bulk dough into target mass units. Roll each firmly into a taut sphere, place in oiled proofing tray, and return to cold storage.</div>
+                </div>
+            `;
+            day1Container.appendChild(interContainer);
+        }
+
+        // BAKE DAY
+        let bakeContainer = document.createElement("div");
+        bakeContainer.className = "day-group";
+        
+        let headerDayString = deltaDays === 0 ? "Later Today" : `Day ${deltaDays + 1}: ${getFormattedDate(cookObj)}`;
+        bakeContainer.innerHTML = `<div class="day-header">${headerDayString} - Matrix Tempering &amp; Bake Execution</div>`;
+        
+        let phase4Alert = (altitude === "high") ? `<div class="alert-box">⚠️ <strong>High Altitude Environment:</strong> Keep proofing box sealed during tempering to prevent mountain air from building a dry leather skin.</div>` : "";
+        
+        bakeContainer.innerHTML += `
+            <div class="phase">
+                <div class="phase-title">Phase 4: Counter Tempering</div>
+                <div class="phase-text">Exactly 3.5 hours before live fire execution, place proofing box on counter to temper to room temperature. ${phase4Alert}</div>
+            </div>
+        `;
+        
+        let heatProfile = "Saturate your refractory stone baking liner under full fuel configurations for 45 minutes targeting 750°F - 800°F.";
+        let bakeTime = "90 to 120 seconds";
+        
+        if (ovenType !== "pizza") {
+            heatProfile = `Preheat ${stoneText} on the top-third rack at ${tempText} for exactly 1 hour.`;
+            if (stoneType === "steel_14") bakeTime = (ovenType === "convection") ? "4 to 5 minutes" : "5 to 7 minutes";
+            else if (stoneType === "steel_18") bakeTime = (ovenType === "convection") ? "5 to 6 minutes" : "6 to 8 minutes";
+            else bakeTime = (ovenType === "convection") ? "6 to 8 minutes" : "7 to 9 minutes";
+        }
+        
+        bakeContainer.innerHTML += `
+            <div class="phase">
+                <div class="phase-title">Phase 5: Floor Saturation &amp; Launch Execution</div>
+                <div class="phase-text">${heatProfile} Stretch out to target diameter, top cleanly, and slide onto the ${stoneText}. Bake for ${bakeTime}, rotating dynamically until optimally charred.</div>
+            </div>
+        `;
+        timeline.appendChild(bakeContainer);
+    }
+
+    function renderTavernTimelineText(steps, cookIndex, ovenType, yeastType, yeastGrams, warmBloomWater, saltGrams, coldMainWater) {
+        const timeline = document.getElementById("methodTimeline");
+        timeline.innerHTML = "";
+        
+        // Group steps by Target Day Offset
+        const daysMap = {};
+        steps.forEach(step => {
+            if (!daysMap[step.target_day_offset]) {
+                daysMap[step.target_day_offset] = [];
+            }
+            daysMap[step.target_day_offset].push(step);
+        });
+
+        const tempSelect = document.getElementById("maxTemp");
+        const tempText = tempSelect.options[tempSelect.selectedIndex].text;
+        const stoneSelect = document.getElementById("stoneType");
+        const stoneText = stoneSelect.options[stoneSelect.selectedIndex].text;
+
+        Object.keys(daysMap).sort((a,b) => parseInt(a) - parseInt(b)).forEach(offsetStr => {
+            let offset = parseInt(offsetStr);
+            let dateObj = new Date(baseDate.getTime());
+            dateObj.setDate(baseDate.getDate() + cookIndex + offset);
+            
+            let dayContainer = document.createElement("div");
+            dayContainer.className = "day-group";
+            let dayLabel = offset === 0 ? "Bake Day" : "Prep Day";
+            dayContainer.innerHTML = `<div class="day-header">${dayLabel}: ${getFormattedDate(dateObj)}</div>`;
+            
+            daysMap[offsetStr].forEach(step => {
+                let desc = step.desc;
+                
+                // Inject Dynamic Values for Phase 1
+                if (step.step_id === 1) {
+                    if (yeastType === "ADY") {
+                        desc = desc.replace("yeast", `Active Dry Yeast (${yeastGrams.toFixed(2)}g)`).replace("warm water (105°F)", `warm water (${warmBloomWater.toFixed(1)}g at 105°F)`);
+                    } else {
+                        desc = `Whisk Instant Dry Yeast (${yeastGrams.toFixed(2)}g) directly into dry ingredients. Dissolve salt and sugar into cold water (${coldMainWater.toFixed(1)}g). Mix 90 seconds on low until shaggy. Cover and rest for 30 minutes to autolyse.`;
+                    }
+                }
+                
+                // Inject Dynamic Oven Text
+                if (step.desc === "DYNAMIC_OVEN_TEXT") {
+                    if (ovenType === "pizza") {
+                        desc = "Turn Pizza Oven gas burner to High, targeting a stone floor temp of 540°F (Do Not Exceed 575°F). You want a lower deck temp than Neapolitan to ensure the crust dries out and crisps completely before burning.";
+                    } else {
+                        desc = `For home ovens, preheat your ${stoneText} at ${tempText} on conventional bake mode for a minimum of 60 minutes. Turn OFF convection if possible to avoid rapid surface air drying during the longer bake.`;
+                    }
+                }
+
+                dayContainer.innerHTML += `
+                    <div class="phase">
+                        <div class="phase-time">${step.time}</div>
+                        <div class="phase-title">${step.title}</div>
+                        <div class="phase-text">${desc}</div>
+                    </div>
+                `;
+            });
+            timeline.appendChild(dayContainer);
+        });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        populateDateDropdowns();
+        renderFlourInventory();
+        
+        const ovenEl = document.getElementById("ovenType");
+        ovenEl.addEventListener("change", () => {
+            updateOvenOptions();
+            calculateFormula();
+        });
+        
+        // Initial populate of dependent dropdowns
+        rebuildOvenDropdown();
+        updateDiameterOptions();
+        toggleDateInputs();
+        
+        document.getElementById("pizzaStyle").addEventListener("change", () => {
+            rebuildOvenDropdown();
+            updateDiameterOptions();
+            toggleDateInputs();
+            calculateFormula();
+        });
+
+        const triggers = ["maxTemp", "stoneType", "yeastType", "altitude", "startDate", "cookingDate", "detroitStartTime", "detroitBakeTime", "ballCount", "diameter"];
+        triggers.forEach(id => {
+            document.getElementById(id).addEventListener(id === "ballCount" ? "input" : "change", calculateFormula);
+        });
+        
+        // Add event listener directly to inventory container checkboxes
+        document.getElementById("inventoryContainer").addEventListener("change", calculateFormula);
+        
+        calculateFormula();
+    });
+</script>
+
+</body>
+</html>
