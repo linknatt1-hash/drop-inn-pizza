@@ -7,13 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #f4f1ea; /* Cardboard-ish warm off-white */
+            --bg-main: #f4f1ea; 
             --bg-card: #ffffff;
             --text-main: #2c2520;
             --text-muted: #554c44;
-            --accent: #da291c; /* Classic Chicago Pizza Box Red */
+            --accent: #da291c; 
             --accent-light: #fbeae9;
-            --secondary: #00843D; /* Classic Pizza Box Green */
+            --secondary: #00843D; 
             --border: #e2dcd1;
             --success: #15803d;
             --error: #b91c1c;
@@ -51,7 +51,7 @@
             padding: 4px;
             margin-bottom: 40px;
             box-shadow: 0 10px 20px -5px rgba(0,0,0,0.15);
-            transform: rotate(-1deg); /* Playful slight tilt */
+            transform: rotate(-1deg); 
         }
         
         .chicago-box-inner {
@@ -59,7 +59,7 @@
             padding: 40px 20px;
             text-align: center;
             background-image: radial-gradient(var(--bg-main) 1px, transparent 1px);
-            background-size: 20px 20px; /* Subtle flour dusting texture */
+            background-size: 20px 20px; 
         }
 
         .chicago-box-inner .stars {
@@ -443,10 +443,40 @@
             margin-top: 8px;
         }
 
+        /* --- New button styles for image capture --- */
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-top: 40px;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .download-btn:hover {
+            background-color: #006b32;
+        }
+
+        .download-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+
         .hidden {
             display: none !important;
         }
     </style>
+    <!-- Add html2canvas library for image generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -560,8 +590,8 @@
             </div>
         </div>
 
-        <!-- Dynamic Output Dashboard -->
-        <div class="panel">
+        <!-- Dynamic Output Dashboard (ID added for HTML2Canvas) -->
+        <div class="panel" id="outputPanel">
             <div class="panel-title">Formula Breakdown &amp; Execution Strategy</div>
             
             <div id="errorView" class="error-banner hidden"></div>
@@ -576,7 +606,7 @@
                 </div>
 
                 <div id="tavernAlert" class="tavern-banner hidden">
-                    <strong>Tavern Style Engaged:</strong> Math engine switched to fixed baker's percentages. Curing process requires rolling paper thin and leaving uncovered to dehydrate overnight. 
+                    <!-- Updated dynamically -->
                 </div>
 
                 <div id="altitudeAlert" class="info-banner hidden"></div>
@@ -623,32 +653,37 @@
                 <div class="method-timeline" id="methodTimeline">
                     <!-- Loaded dynamically via JS -->
                 </div>
+
+                <!-- Capture Button: Uses data attribute so it hides itself from the final image -->
+                <button id="downloadRecipeBtn" class="download-btn" data-html2canvas-ignore="true">
+                    📸 Save Recipe as Image
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. Comprehensive Flour Database
+    // 1. Comprehensive Flour Database (With W-Values updated for precision)
     const flourDatabase = [
         // 00 Flours
         { id: "cm_00_norm", category: "00", brand: "Central Milling", name: "Organic Type 00 Normal Flour", protein: 11.5, ash: 0.55, w: 290, neo_score: 9, tav_score: 4, det_score: 6, ny_score: 5, foc_score: 5, notes: "Variety: Organic Hard Red Winter Wheat. Treatment: None." },
         { id: "cm_00_tg", category: "00", brand: "Central Milling", name: "Tony Gemignani 'California Artisan' 00", protein: 15.0, ash: 0.55, w: 395, neo_score: 10, tav_score: 3, det_score: 7, ny_score: 6, foc_score: 6, notes: "High protein backbone. Treatment: Ascorbic Acid, Vital Wheat Gluten, Malted." },
         { id: "cap_00_piz", category: "00", brand: "Antimo Caputo", name: "Pizzeria 00 (Blue Bag)", protein: 12.5, ash: 0.50, w: 260, neo_score: 8, tav_score: 2, det_score: 5, ny_score: 4, foc_score: 4, notes: "The gold standard for wood-fired Neapolitan. High elasticity." },
         { id: "cap_00_chf", category: "00", brand: "Antimo Caputo", name: "Chef/Cuoco 00 (Red Bag)", protein: 13.0, ash: 0.50, w: 320, neo_score: 7, tav_score: 3, det_score: 6, ny_score: 5, foc_score: 5, notes: "Stronger gluten matrix, perfect for longer slow ferments." },
-        { id: "ka_00", category: "00", brand: "King Arthur", name: "00 Pizza Flour", protein: 11.5, ash: 0.50, w: 0, neo_score: 6, tav_score: 4, det_score: 6, ny_score: 5, foc_score: 5, notes: "Domestic 00, optimized for high heat ovens." },
+        { id: "ka_00", category: "00", brand: "King Arthur", name: "00 Pizza Flour", protein: 11.5, ash: 0.50, w: 260, neo_score: 6, tav_score: 4, det_score: 6, ny_score: 5, foc_score: 5, notes: "Domestic 00, optimized for high heat ovens." },
         
         // Bread Flours
-        { id: "cm_bread_org", category: "bread", brand: "Central Milling", name: "Organic Bread Flour", protein: 11.5, ash: 0.60, w: 0, neo_score: 6, tav_score: 6, det_score: 10, ny_score: 10, foc_score: 10, notes: "Varieties: Organic Hard Red Winter & Hard Red Spring Wheat. Malted." },
-        { id: "cm_bread_ow", category: "bread", brand: "Central Milling", name: "Old-World Bread Flour", protein: 12.5, ash: 0.80, w: 0, neo_score: 5, tav_score: 4, det_score: 9, ny_score: 9, foc_score: 9, notes: "Variety: Organic Hard Red Spring Wheat. High ash profile." },
-        { id: "ka_bread", category: "bread", brand: "King Arthur", name: "Bread Flour", protein: 12.7, ash: 0.50, w: 0, neo_score: 7, tav_score: 5, det_score: 8, ny_score: 8, foc_score: 8, notes: "Excellent unbleached spring wheat structural flour." },
-        { id: "brm_bread", category: "bread", brand: "Bob's Red Mill", name: "Artisan Bread Flour", protein: 12.5, ash: 0.52, w: 0, neo_score: 7, tav_score: 5, det_score: 7, ny_score: 7, foc_score: 7, notes: "Malted barley flour enhanced structural matrix." },
+        { id: "cm_bread_org", category: "bread", brand: "Central Milling", name: "Organic Bread Flour", protein: 11.5, ash: 0.60, w: 300, neo_score: 6, tav_score: 6, det_score: 10, ny_score: 10, foc_score: 10, notes: "Varieties: Organic Hard Red Winter & Hard Red Spring Wheat. Malted." },
+        { id: "cm_bread_ow", category: "bread", brand: "Central Milling", name: "Old-World Bread Flour", protein: 12.5, ash: 0.80, w: 320, neo_score: 5, tav_score: 4, det_score: 9, ny_score: 9, foc_score: 9, notes: "Variety: Organic Hard Red Spring Wheat. High ash profile." },
+        { id: "ka_bread", category: "bread", brand: "King Arthur", name: "Bread Flour", protein: 12.7, ash: 0.50, w: 330, neo_score: 7, tav_score: 5, det_score: 8, ny_score: 8, foc_score: 8, notes: "Excellent unbleached spring wheat structural flour." },
+        { id: "brm_bread", category: "bread", brand: "Bob's Red Mill", name: "Artisan Bread Flour", protein: 12.5, ash: 0.52, w: 320, neo_score: 7, tav_score: 5, det_score: 7, ny_score: 7, foc_score: 7, notes: "Malted barley flour enhanced structural matrix." },
         
         // AP Flours
-        { id: "cm_ap_org", category: "ap", brand: "Central Milling", name: "Organic AP", protein: 10.5, ash: 0.55, w: 0, neo_score: 4, tav_score: 10, det_score: 5, ny_score: 5, foc_score: 5, notes: "Treatment: Malted with Organic Malted Barley Flour." },
-        { id: "ka_ap", category: "ap", brand: "King Arthur", name: "All-Purpose Flour", protein: 11.7, ash: 0.48, w: 0, neo_score: 5, tav_score: 8, det_score: 6, ny_score: 6, foc_score: 6, notes: "Consistent unbleached hard red winter wheat profile." }, 
-        { id: "brm_ap", category: "ap", brand: "Bob's Red Mill", name: "All-Purpose Flour", protein: 11.8, ash: 0.50, w: 0, neo_score: 6, tav_score: 7, det_score: 6, ny_score: 6, foc_score: 6, notes: "Unbleached premium baking flour baseline." },
-        { id: "ks_ap", category: "ap", brand: "Kirkland Signature", name: "Organic AP Flour", protein: 11.5, ash: 0.50, w: 0, neo_score: 5, tav_score: 9, det_score: 5, ny_score: 5, foc_score: 5, notes: "Reliable bulk AP flour, great for tender tavern crusts." }
+        { id: "cm_ap_org", category: "ap", brand: "Central Milling", name: "Organic AP", protein: 10.5, ash: 0.55, w: 220, neo_score: 4, tav_score: 10, det_score: 5, ny_score: 5, foc_score: 5, notes: "Treatment: Malted with Organic Malted Barley Flour." },
+        { id: "ka_ap", category: "ap", brand: "King Arthur", name: "All-Purpose Flour", protein: 11.7, ash: 0.48, w: 250, neo_score: 5, tav_score: 8, det_score: 6, ny_score: 6, foc_score: 6, notes: "Consistent unbleached hard red winter wheat profile." }, 
+        { id: "brm_ap", category: "ap", brand: "Bob's Red Mill", name: "All-Purpose Flour", protein: 11.8, ash: 0.50, w: 250, neo_score: 6, tav_score: 7, det_score: 6, ny_score: 6, foc_score: 6, notes: "Unbleached premium baking flour baseline." },
+        { id: "ks_ap", category: "ap", brand: "Kirkland Signature", name: "Organic AP Flour", protein: 11.5, ash: 0.50, w: 240, neo_score: 5, tav_score: 9, det_score: 5, ny_score: 5, foc_score: 5, notes: "Reliable bulk AP flour, great for tender tavern crusts." }
     ];
 
     // Tavern JSON Data implementation
@@ -751,9 +786,9 @@
                 const checkedAttr = defaultCheckedIds.includes(f.id) ? "checked" : "";
                 
                 label.innerHTML = `
-                    <input type="checkbox" value="${f.id}" data-category="${cat.id}" ${checkedAttr} onchange="calculateFormula()">
+                    <input type="checkbox" value="${f.id}" data-category="${cat.id}" ${checkedAttr}>
                     <div class="flour-details">
-                        <span class="flour-name">[${f.brand}] ${f.name}</span><br>
+                        <span class="flour-name">${f.brand} - ${f.name}</span><br>
                         Protein: ${f.protein}% | Ash: ${f.ash}% ${f.w > 0 ? `| W: ${f.w}` : ''}
                     </div>
                 `;
@@ -1003,7 +1038,11 @@
         let actualHours = availHours >= idealHours ? idealHours : availHours;
         let scheduleStartH = bakeH - actualHours;
 
-        let hydrationCalculated = 73.0; // Sea Level Base
+        // W-Value Integration for Focaccia: Base W = 300 targets 73%
+        let baseW = 300;
+        let wDeviation = (selectedFlour.w - baseW) / 20;
+        let hydrationCalculated = 73.0 + wDeviation;
+
         // Base Sea-Level IDY perfectly scaled so 4-hr High-Alt ADY matches 4.5g baseline
         let yeastPct = (idealHours / actualHours) * 0.85; 
         let saltPct = 2.5; 
@@ -1018,6 +1057,8 @@
         } else {
             altAlert.classList.add("hidden");
         }
+
+        hydrationCalculated = Math.round(hydrationCalculated * 10) / 10;
 
         if (yeastType === "ADY") yeastPct *= 1.25;
         yeastPct = Math.round(yeastPct * 10000) / 10000;
@@ -1048,7 +1089,7 @@
             appendRow(tableBody, "Warm Water (100°F-105°F Bloom Pool)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
             appendRow(tableBody, "Main Mix Water", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
         } else {
-            appendRow(tableBody, "Water (Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
+            appendRow(tableBody, "Water (Direct Integration)", `${hydrationCalculated.toFixed(1)}%`, totalWaterGrams);
         }
 
         appendRow(tableBody, "Kosher Salt", `${saltPct.toFixed(2)}%`, saltGrams);
@@ -1060,6 +1101,444 @@
         appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
 
         renderFocacciaTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, sugarGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude);
+    }
+
+    function calculateNeapolitan(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
+        // UI Toggles
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+        tavernAlert.classList.add("hidden");
+
+        let area = 0;
+        let labelSize = diamVal;
+        if (diamVal === "10x14") {
+            area = 10 * 14;
+        } else {
+            const d = parseInt(diamVal);
+            area = Math.PI * (d / 2) * (d / 2);
+            labelSize = d + '"';
+        }
+
+        const baseGramsPerSqIn = 2.21;
+        const calculatedBallWeight = Math.round(area * baseGramsPerSqIn);
+
+        // W-Value Integration for Neapolitan: Base W = 280 targets 63%
+        let baseW = 280;
+        let wDeviation = (selectedFlour.w - baseW) / 25; // 1% hydration adjustment per 25 W points
+        let hydrationCalculated = 63.0 + wDeviation;
+        
+        let saltPct = 3.0; 
+        let oilPct = 0.0;
+        let sugarPct = 0.0;
+        
+        if (ovenType !== "pizza") {
+            homeAlert.classList.remove("hidden");
+            oilPct = 2.0;
+            sugarPct = 1.0;
+            hydrationCalculated += 2.0; 
+        } else {
+            homeAlert.classList.add("hidden");
+        }
+
+        if (altitude === "high") {
+            hydrationCalculated += 2.0; 
+            altAlert.innerHTML = "<strong>Altitude Adjustment:</strong> Hydration increased by +2% and yeast reduced by 20% to control fermentation rate in lower atmospheric pressure.";
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+        
+        hydrationCalculated = Math.round(hydrationCalculated * 10) / 10;
+
+        // Yeast Curve
+        let baseUnits = 0.0684 * 60;
+        let yeastPct = baseUnits / totalHours;
+        if (altitude === "high") yeastPct = yeastPct * 0.80; 
+        
+        // Convert to IDY if selected
+        if (yeastType === "IDY") yeastPct *= 0.75;
+
+        if (yeastPct > 1.0) yeastPct = 1.0;
+        if (yeastPct < 0.02) yeastPct = 0.02;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        // Mass Calculations
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let scaleLossFactor = 1.0; 
+        let totalTargetMass = rawDoughMass * scaleLossFactor;
+
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + sugarPct;
+        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let sugarGrams = flourGrams * (sugarPct / 100);
+
+        updateDashboardHeader(selectedFlour, hydrationCalculated, totalHours);
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
+        appendRow(tableBody, "Flour (System Selected Matrix)", "100.00%", flourGrams);
+
+        if (yeastType === "ADY") {
+            let warmBloomWater = totalWaterGrams * 0.084;
+            let coldMainWater = totalWaterGrams * (1 - 0.084);
+            appendRow(tableBody, "Cold Water (Main Batch Solution)", `${Math.round((100 - 8.4) * (hydrationCalculated/100) * 100)/100}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (Yeast Bloom 105°F Pool)", `${Math.round(8.4 * (hydrationCalculated/100) * 100)/100}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Cold Water (Direct Integration)", `${hydrationCalculated.toFixed(1)}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        
+        if (ovenType !== "pizza") {
+            appendRow(tableBody, "Extra Virgin Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+            appendRow(tableBody, "Sugar / Diastatic Malt", `${sugarPct.toFixed(2)}%`, sugarGrams);
+        }
+        
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct}%`, yeastGrams);
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + sugarGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        let neapolitanCheeseGrams = Math.round(area * 0.9);
+        appendRow(cheeseTable, "Fresh Mozzarella (Torn, Drained)", "", `${neapolitanCheeseGrams}g`, true);
+
+        renderNeapolitanTimelineText(yeastType, altitude, timeDeltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams);
+    }
+
+    function calculateTavern(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        homeAlert.classList.add("hidden");
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+
+        const tData = tavernRecipeData;
+        
+        let userArea = 0;
+        let labelSize = diamVal;
+        if (diamVal === "10x14") {
+            userArea = 10 * 14;
+        } else {
+            const d = parseInt(diamVal);
+            userArea = Math.PI * (d / 2) * (d / 2);
+            labelSize = d + '"';
+        }
+        
+        const baseArea14 = Math.PI * (7 * 7);
+        
+        // Base Tavern 14" ball = 375g. 
+        const gramsPerSqIn = tData.base_dough_ball_g / baseArea14; // ~2.436
+        const calculatedBallWeight = Math.round(userArea * gramsPerSqIn);
+
+        // W-Value Integration for Tavern: Base 52%. Scaling slightly for extreme strength to allow proper rolling.
+        let hydrationCalculated = tData.bakers_percentages.water;
+        let wDeviation = (selectedFlour.w - 240) / 40;
+        hydrationCalculated += wDeviation;
+        hydrationCalculated = Math.round(hydrationCalculated * 10) / 10;
+        
+        let flourAlertText = "";
+        if (selectedFlour.w > 300) {
+            flourAlertText = ` High strength structural flour detected (W-Factor: ${selectedFlour.w}). Automatically increased hydration to ${hydrationCalculated}% to ensure the matrix can be rolled paper-thin without snapping back.`;
+        }
+
+        tavernAlert.innerHTML = `<strong>Tavern Style Engaged:</strong> Math engine switched to fixed baker's percentages. Curing process requires rolling paper thin and leaving uncovered to dehydrate overnight.${flourAlertText}`;
+        tavernAlert.classList.remove("hidden");
+
+        let saltPct = tData.bakers_percentages.salt;
+        let oilPct = tData.bakers_percentages.oil; // Corn Oil
+        let sugarPct = tData.bakers_percentages.sugar;
+        let yeastPct = tData.bakers_percentages.yeast_ady;
+
+        // Altitude tweak - minor reduction for yeast if high alt
+        if (altitude === "high") {
+            yeastPct = yeastPct * 0.90;
+            altAlert.innerHTML = "<strong>Altitude Adjustment:</strong> Yeast reduced by 10% to prevent over-proofing in lower atmospheric pressure.";
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+        
+        if (yeastType === "IDY") yeastPct *= 0.75;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let scaleLossFactor = 1.0; 
+        let totalTargetMass = rawDoughMass * scaleLossFactor;
+
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + sugarPct;
+        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let sugarGrams = flourGrams * (sugarPct / 100);
+
+        updateDashboardHeader(selectedFlour, hydrationCalculated, 24); // Force 24h display for tavern process
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
+        appendRow(tableBody, "Flour", "100.00%", flourGrams);
+        
+        let warmBloomWater = 75 * (flourGrams / 675); // Scaling bloom water relative to flour
+        if (warmBloomWater > totalWaterGrams) warmBloomWater = totalWaterGrams * 0.20;
+        let coldMainWater = totalWaterGrams - warmBloomWater;
+
+        if (yeastType === "ADY") {
+            appendRow(tableBody, "Room-Temp Water (70°F Main Batch)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (100°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Water (70°F Direct Integration)", `${hydrationCalculated.toFixed(1)}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Granulated Sugar", `${sugarPct.toFixed(2)}%`, sugarGrams);
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        appendRow(tableBody, "Corn Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct}%`, yeastGrams);
+        
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + sugarGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const areaMultiplierPerPizza = userArea / baseArea14;
+        
+        // Cheese and Assembly is per pizza
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        tData.ingredients_by_component.toppings_per_pizza.forEach(item => {
+            let massStr = item.mass_g;
+            if (typeof massStr === "number") {
+                massStr = (massStr * areaMultiplierPerPizza).toFixed(0) + "g";
+            }
+            appendRow(cheeseTable, item.item, "", massStr, true);
+        });
+
+        renderTavernTimelineText(tData.timeline_steps, cookIndex, ovenType, yeastType, yeastGrams, warmBloomWater, saltGrams, coldMainWater);
+    }
+
+    function calculateDetroit(selectedFlour, altitude, yeastType, ovenType, ballCount, diamVal, startH, bakeH, availHours) {
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        homeAlert.classList.add("hidden");
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+        tavernAlert.classList.add("hidden");
+
+        let area = 0;
+        let labelSize = diamVal;
+        if (diamVal === "9x12") {
+            area = 9 * 12;
+        } else if (diamVal === "9x13") {
+            area = 9 * 13;
+        } else if (diamVal === "10x14") {
+            area = 10 * 14;
+        } else if (diamVal === "13x18") {
+            area = 13 * 18;
+        } else {
+            const d = parseInt(diamVal);
+            area = Math.PI * (d / 2) * (d / 2);
+            labelSize = d + '"';
+        }
+        
+        // Detroit Factor: ~3.56g per sq inch
+        const gramsPerSqIn = 3.56; 
+        const calculatedBallWeight = Math.round(area * gramsPerSqIn);
+        
+        let idealHours = 5.0; // 5 hours is the optimal target (mixing to pan proof to bake)
+        let actualHours = availHours >= idealHours ? idealHours : availHours;
+        let scheduleStartH = bakeH - actualHours;
+
+        // W-Value Integration for Detroit: Base 300 targets 73%
+        let baseW = 300;
+        let wDeviation = (selectedFlour.w - baseW) / 20;
+        let hydrationCalculated = 73.0 + wDeviation;
+        
+        // Dynamically scale yeast based on actual time we are going to use
+        // If we are forcing it into 2 hours, it scales up to 2.5% (5/2 * 1.0). If 5 hours, it's 1.0%.
+        let yeastPct = (idealHours / actualHours) * 1.0;
+        
+        let saltPct = 2.0;
+        let oilPct = 2.0; 
+        let maltPct = 2.0; // Barley Malt Syrup
+
+        if (altitude === "high") {
+            hydrationCalculated += 2.0; 
+            yeastPct = yeastPct * 0.75; 
+            altAlert.innerHTML = `<strong>Altitude Adjustment:</strong> Hydration increased and yeast reduced to ${yeastPct.toFixed(2)}% to prevent pan collapse and maintain pillowy structure.`;
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+
+        hydrationCalculated = Math.round(hydrationCalculated * 10) / 10;
+
+        if (yeastType === "IDY") yeastPct *= 0.75;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let scaleLossFactor = 1.0; 
+        let totalTargetMass = rawDoughMass * scaleLossFactor;
+
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + maltPct;
+        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let maltGrams = flourGrams * (maltPct / 100);
+
+        updateDashboardHeader(selectedFlour, hydrationCalculated, availHours);
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Pan)`, calculatedBallWeight);
+        appendRow(tableBody, "Flour", "100.00%", flourGrams);
+        
+        let warmBloomWater = flourGrams * 0.20; 
+        let coldMainWater = totalWaterGrams - warmBloomWater;
+
+        if (yeastType === "ADY") {
+            appendRow(tableBody, "Chilled Water (45°F-50°F Main Batch)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (100°F-105°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Chilled Water (45°F-50°F Direct Integration)", `${hydrationCalculated.toFixed(1)}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        appendRow(tableBody, "Barley Malt Syrup", `${maltPct.toFixed(2)}%`, maltGrams);
+        appendRow(tableBody, "Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct.toFixed(2)}%`, yeastGrams);
+        
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + maltGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        
+        // Detroit cheese: 2.5g per sq in total (40% Provolone Edge, 60% Mozzarella Center)
+        const detroitCheeseTotal = Math.round(area * 2.5);
+        const provoloneGrams = Math.round(detroitCheeseTotal * 0.4); 
+        const mozzGrams = detroitCheeseTotal - provoloneGrams; 
+        
+        appendRow(cheeseTable, "Provolone (Sliced thick, pressed against pan walls)", "", `${provoloneGrams}g`, true);
+        appendRow(cheeseTable, "Low-Moisture Mozzarella (Cubed, center focus)", "", `${mozzGrams}g`, true);
+
+        renderDetroitTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, maltGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude);
+    }
+
+    function calculateNY(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
+        const homeAlert = document.getElementById("homeOvenAlert");
+        const tavernAlert = document.getElementById("tavernAlert");
+        const altAlert = document.getElementById("altitudeAlert");
+        
+        homeAlert.classList.add("hidden");
+        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
+        tavernAlert.classList.add("hidden");
+
+        let area = 0;
+        let labelSize = diamVal;
+        const d = parseInt(diamVal);
+        area = Math.PI * (d / 2) * (d / 2);
+        labelSize = d + '"';
+
+        const gramsPerSqIn = 3.001; 
+        const calculatedBallWeight = Math.round(area * gramsPerSqIn);
+
+        // W-Value Integration for NY Style: Base 280 targets 65%
+        let baseW = 280;
+        let wDeviation = (selectedFlour.w - baseW) / 20;
+        let hydrationCalculated = 65.0 + wDeviation;
+        hydrationCalculated = Math.round(hydrationCalculated * 10) / 10;
+        
+        let saltPct = 2.5;
+        let oilPct = 4.1; 
+        let maltPct = 1.6;
+
+        let yeastPct = 0.43; // 24h baseline
+        
+        // Adaptive yeast scaling based on timeline selected
+        if (timeDeltaDays === 0) {
+            yeastPct = 1.0; 
+        } else if (timeDeltaDays === 1) {
+            yeastPct = 0.5;
+        } else if (timeDeltaDays === 2) {
+            yeastPct = 0.35;
+        } else {
+            yeastPct = 0.25;
+        }
+
+        if (altitude === "high") {
+            yeastPct = yeastPct * 0.8; 
+            altAlert.innerHTML = `<strong>Altitude Adjustment:</strong> Yeast reduced to ${yeastPct.toFixed(2)}% to control fermentation rate in lower atmospheric pressure.`;
+            altAlert.classList.remove("hidden");
+        } else {
+            altAlert.classList.add("hidden");
+        }
+
+        if (yeastType === "IDY") yeastPct *= 0.75;
+        yeastPct = Math.round(yeastPct * 10000) / 10000;
+
+        let rawDoughMass = ballCount * calculatedBallWeight;
+        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + maltPct;
+        let flourGrams = (rawDoughMass / totalPercentageMatrix) * 100;
+        
+        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
+        let saltGrams = flourGrams * (saltPct / 100);
+        let yeastGrams = flourGrams * (yeastPct / 100);
+        let oilGrams = flourGrams * (oilPct / 100);
+        let maltGrams = flourGrams * (maltPct / 100);
+
+        let hasT80 = document.querySelector('input[value="cm_bread_ow"]') && document.querySelector('input[value="cm_bread_ow"]').checked;
+        
+        updateDashboardHeader(selectedFlour, hydrationCalculated, totalHours);
+        
+        let tableBody = document.getElementById("formulaTableBody");
+        tableBody.innerHTML = "";
+        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
+        
+        if (hasT80) {
+            appendRow(tableBody, `Bread Flour (${selectedFlour.brand} ${selectedFlour.name})`, "80.00%", flourGrams * 0.80);
+            appendRow(tableBody, `Old-World T80 Flour (Central Milling)`, "20.00%", flourGrams * 0.20);
+        } else {
+            appendRow(tableBody, `Flour (${selectedFlour.brand} ${selectedFlour.name})`, "100.00%", flourGrams);
+        }
+        
+        let warmBloomWater = 50.0;
+        if (warmBloomWater > totalWaterGrams) warmBloomWater = totalWaterGrams * 0.2;
+        let coldMainWater = totalWaterGrams - warmBloomWater;
+
+        if (yeastType === "ADY") {
+            appendRow(tableBody, "Main Mix Water (85°F)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
+            appendRow(tableBody, "Warm Water (100°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
+        } else {
+            appendRow(tableBody, "Water (85°F Direct Integration)", `${hydrationCalculated.toFixed(1)}%`, totalWaterGrams);
+        }
+
+        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
+        appendRow(tableBody, "Barley Malt Syrup", `${maltPct.toFixed(2)}%`, maltGrams);
+        appendRow(tableBody, "Extra Virgin Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
+        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct.toFixed(2)}%`, yeastGrams);
+        
+        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + maltGrams;
+        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
+
+        const cheeseTable = document.getElementById("cheeseTableBody");
+        cheeseTable.innerHTML = "";
+        
+        const totalCheeseGrams = Math.round(area * 1.44); 
+        appendRow(cheeseTable, "Low-Moisture Whole-Milk Mozzarella (Shredded)", "", `${totalCheeseGrams}g`, true);
+        appendRow(cheeseTable, "Pecorino Romano (Finely Grated, under the Mozzarella)", "", `15g`, true);
+
+        renderNYTimelineText(yeastType, altitude, timeDeltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams, maltGrams, diamVal, warmBloomWater, coldMainWater);
     }
 
     function renderFocacciaTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, sugarGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude) {
@@ -1131,432 +1610,6 @@
         `;
         
         timeline.appendChild(container);
-    }
-
-    function calculateNeapolitan(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
-        // UI Toggles
-        const homeAlert = document.getElementById("homeOvenAlert");
-        const tavernAlert = document.getElementById("tavernAlert");
-        const altAlert = document.getElementById("altitudeAlert");
-        
-        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
-        tavernAlert.classList.add("hidden");
-
-        let area = 0;
-        let labelSize = diamVal;
-        if (diamVal === "10x14") {
-            area = 10 * 14;
-        } else {
-            const d = parseInt(diamVal);
-            area = Math.PI * (d / 2) * (d / 2);
-            labelSize = d + '"';
-        }
-
-        const baseGramsPerSqIn = 2.21;
-        const calculatedBallWeight = Math.round(area * baseGramsPerSqIn);
-
-        let baseHydration = 63.0;
-        let proteinDeviation = selectedFlour.protein - 12.0;
-        let hydrationCalculated = baseHydration + (proteinDeviation * 1.5);
-        
-        let saltPct = 3.0; 
-        let oilPct = 0.0;
-        let sugarPct = 0.0;
-        
-        if (ovenType !== "pizza") {
-            homeAlert.classList.remove("hidden");
-            oilPct = 2.0;
-            sugarPct = 1.0;
-            hydrationCalculated += 2.0; 
-        } else {
-            homeAlert.classList.add("hidden");
-        }
-
-        if (altitude === "high") {
-            hydrationCalculated += 2.0; 
-            altAlert.innerHTML = "<strong>Altitude Adjustment:</strong> Hydration increased by +2% and yeast reduced by 20% to control fermentation rate in lower atmospheric pressure.";
-            altAlert.classList.remove("hidden");
-        } else {
-            altAlert.classList.add("hidden");
-        }
-        
-        hydrationCalculated = Math.round(hydrationCalculated * 10) / 10;
-
-        // Yeast Curve
-        let baseUnits = 0.0684 * 60;
-        let yeastPct = baseUnits / totalHours;
-        if (altitude === "high") yeastPct = yeastPct * 0.80; 
-        
-        // Convert to IDY if selected
-        if (yeastType === "IDY") yeastPct *= 0.75;
-
-        if (yeastPct > 1.0) yeastPct = 1.0;
-        if (yeastPct < 0.02) yeastPct = 0.02;
-        yeastPct = Math.round(yeastPct * 10000) / 10000;
-
-        // Mass Calculations
-        let rawDoughMass = ballCount * calculatedBallWeight;
-        let scaleLossFactor = 1.0; 
-        let totalTargetMass = rawDoughMass * scaleLossFactor;
-
-        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + sugarPct;
-        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
-        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
-        let saltGrams = flourGrams * (saltPct / 100);
-        let yeastGrams = flourGrams * (yeastPct / 100);
-        let oilGrams = flourGrams * (oilPct / 100);
-        let sugarGrams = flourGrams * (sugarPct / 100);
-
-        updateDashboardHeader(selectedFlour, hydrationCalculated, totalHours);
-        
-        let tableBody = document.getElementById("formulaTableBody");
-        tableBody.innerHTML = "";
-        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
-        appendRow(tableBody, "Flour (System Selected Matrix)", "100.00%", flourGrams);
-
-        if (yeastType === "ADY") {
-            let warmBloomWater = totalWaterGrams * 0.084;
-            let coldMainWater = totalWaterGrams * (1 - 0.084);
-            appendRow(tableBody, "Cold Water (Main Batch Solution)", `${Math.round((100 - 8.4) * (hydrationCalculated/100) * 100)/100}%`, coldMainWater);
-            appendRow(tableBody, "Warm Water (Yeast Bloom 105°F Pool)", `${Math.round(8.4 * (hydrationCalculated/100) * 100)/100}%`, warmBloomWater);
-        } else {
-            appendRow(tableBody, "Cold Water (Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
-        }
-
-        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
-        
-        if (ovenType !== "pizza") {
-            appendRow(tableBody, "Extra Virgin Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
-            appendRow(tableBody, "Sugar / Diastatic Malt", `${sugarPct.toFixed(2)}%`, sugarGrams);
-        }
-        
-        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct}%`, yeastGrams);
-        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + sugarGrams;
-        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
-
-        const cheeseTable = document.getElementById("cheeseTableBody");
-        cheeseTable.innerHTML = "";
-        let neapolitanCheeseGrams = Math.round(area * 0.9);
-        appendRow(cheeseTable, "Fresh Mozzarella (Torn, Drained)", "", `${neapolitanCheeseGrams}g`, true);
-
-        renderNeapolitanTimelineText(yeastType, altitude, timeDeltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams);
-    }
-
-    function calculateTavern(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
-        const homeAlert = document.getElementById("homeOvenAlert");
-        const tavernAlert = document.getElementById("tavernAlert");
-        const altAlert = document.getElementById("altitudeAlert");
-        
-        homeAlert.classList.add("hidden");
-        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
-
-        const tData = tavernRecipeData;
-        
-        let userArea = 0;
-        let labelSize = diamVal;
-        if (diamVal === "10x14") {
-            userArea = 10 * 14;
-        } else {
-            const d = parseInt(diamVal);
-            userArea = Math.PI * (d / 2) * (d / 2);
-            labelSize = d + '"';
-        }
-        
-        const baseArea14 = Math.PI * (7 * 7);
-        
-        // Base Tavern 14" ball = 375g. 
-        const gramsPerSqIn = tData.base_dough_ball_g / baseArea14; // ~2.436
-        const calculatedBallWeight = Math.round(userArea * gramsPerSqIn);
-
-        let hydrationCalculated = tData.bakers_percentages.water;
-        
-        // Dynamic flour adjustment for Tavern style
-        let flourAlertText = "";
-        if (selectedFlour.protein >= 12.0) {
-            hydrationCalculated += 2; // Increase hydration to offset high protein toughness in cracker crust
-            flourAlertText = ` High protein structural flour detected (${selectedFlour.protein}%). Automatically increased hydration to ${hydrationCalculated}% to ensure the matrix can be rolled paper-thin without snapping back.`;
-        }
-
-        tavernAlert.innerHTML = `<strong>Tavern Style Engaged:</strong> Math engine switched to fixed baker's percentages. Curing process requires rolling paper thin and leaving uncovered to dehydrate overnight.${flourAlertText}`;
-        tavernAlert.classList.remove("hidden");
-
-        let saltPct = tData.bakers_percentages.salt;
-        let oilPct = tData.bakers_percentages.oil; // Corn Oil
-        let sugarPct = tData.bakers_percentages.sugar;
-        let yeastPct = tData.bakers_percentages.yeast_ady;
-
-        // Altitude tweak - minor reduction for yeast if high alt
-        if (altitude === "high") {
-            yeastPct = yeastPct * 0.90;
-            altAlert.innerHTML = "<strong>Altitude Adjustment:</strong> Yeast reduced by 10% to prevent over-proofing in lower atmospheric pressure.";
-            altAlert.classList.remove("hidden");
-        } else {
-            altAlert.classList.add("hidden");
-        }
-        
-        if (yeastType === "IDY") yeastPct *= 0.75;
-        yeastPct = Math.round(yeastPct * 10000) / 10000;
-
-        let rawDoughMass = ballCount * calculatedBallWeight;
-        let scaleLossFactor = 1.0; 
-        let totalTargetMass = rawDoughMass * scaleLossFactor;
-
-        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + sugarPct;
-        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
-        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
-        let saltGrams = flourGrams * (saltPct / 100);
-        let yeastGrams = flourGrams * (yeastPct / 100);
-        let oilGrams = flourGrams * (oilPct / 100);
-        let sugarGrams = flourGrams * (sugarPct / 100);
-
-        updateDashboardHeader(selectedFlour, hydrationCalculated, 24); // Force 24h display for tavern process
-        
-        let tableBody = document.getElementById("formulaTableBody");
-        tableBody.innerHTML = "";
-        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
-        appendRow(tableBody, "Flour", "100.00%", flourGrams);
-        
-        let warmBloomWater = 75 * (flourGrams / 675); // Scaling bloom water relative to flour
-        if (warmBloomWater > totalWaterGrams) warmBloomWater = totalWaterGrams * 0.20;
-        let coldMainWater = totalWaterGrams - warmBloomWater;
-
-        if (yeastType === "ADY") {
-            appendRow(tableBody, "Room-Temp Water (70°F Main Batch)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
-            appendRow(tableBody, "Warm Water (100°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
-        } else {
-            appendRow(tableBody, "Water (70°F Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
-        }
-
-        appendRow(tableBody, "Granulated Sugar", `${sugarPct.toFixed(2)}%`, sugarGrams);
-        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
-        appendRow(tableBody, "Corn Oil", `${oilPct.toFixed(2)}%`, oilGrams);
-        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct}%`, yeastGrams);
-        
-        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + sugarGrams;
-        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
-
-        const areaMultiplierPerPizza = userArea / baseArea14;
-        
-        // Cheese and Assembly is per pizza
-        const cheeseTable = document.getElementById("cheeseTableBody");
-        cheeseTable.innerHTML = "";
-        tData.ingredients_by_component.toppings_per_pizza.forEach(item => {
-            let massStr = item.mass_g;
-            if (typeof massStr === "number") {
-                massStr = (massStr * areaMultiplierPerPizza).toFixed(0) + "g";
-            }
-            appendRow(cheeseTable, item.item, "", massStr, true);
-        });
-
-        renderTavernTimelineText(tData.timeline_steps, cookIndex, ovenType, yeastType, yeastGrams, warmBloomWater, saltGrams, coldMainWater);
-    }
-
-    function calculateDetroit(selectedFlour, altitude, yeastType, ovenType, ballCount, diamVal, startH, bakeH, availHours) {
-        const homeAlert = document.getElementById("homeOvenAlert");
-        const tavernAlert = document.getElementById("tavernAlert");
-        const altAlert = document.getElementById("altitudeAlert");
-        
-        homeAlert.classList.add("hidden");
-        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
-        tavernAlert.classList.add("hidden");
-
-        let area = 0;
-        let labelSize = diamVal;
-        if (diamVal === "9x12") {
-            area = 9 * 12;
-        } else if (diamVal === "9x13") {
-            area = 9 * 13;
-        } else if (diamVal === "10x14") {
-            area = 10 * 14;
-        } else if (diamVal === "13x18") {
-            area = 13 * 18;
-        } else {
-            const d = parseInt(diamVal);
-            area = Math.PI * (d / 2) * (d / 2);
-            labelSize = d + '"';
-        }
-        
-        // Detroit Factor: ~3.56g per sq inch
-        const gramsPerSqIn = 3.56; 
-        const calculatedBallWeight = Math.round(area * gramsPerSqIn);
-        
-        let idealHours = 5.0; // 5 hours is the optimal target (mixing to pan proof to bake)
-        let actualHours = availHours >= idealHours ? idealHours : availHours;
-        let scheduleStartH = bakeH - actualHours;
-
-        let hydrationCalculated = 73.0; // Sea Level Base
-        
-        // Dynamically scale yeast based on actual time we are going to use
-        // If we are forcing it into 2 hours, it scales up to 2.5% (5/2 * 1.0). If 5 hours, it's 1.0%.
-        let yeastPct = (idealHours / actualHours) * 1.0;
-        
-        let saltPct = 2.0;
-        let oilPct = 2.0; 
-        let maltPct = 2.0; // Barley Malt Syrup
-
-        if (altitude === "high") {
-            hydrationCalculated = 75.0; 
-            yeastPct = yeastPct * 0.75; 
-            altAlert.innerHTML = `<strong>Altitude Adjustment:</strong> Hydration increased to 75% and yeast reduced to ${yeastPct.toFixed(2)}% to prevent pan collapse and maintain pillowy structure.`;
-            altAlert.classList.remove("hidden");
-        } else {
-            altAlert.classList.add("hidden");
-        }
-
-        if (yeastType === "IDY") yeastPct *= 0.75;
-        yeastPct = Math.round(yeastPct * 10000) / 10000;
-
-        let rawDoughMass = ballCount * calculatedBallWeight;
-        let scaleLossFactor = 1.0; 
-        let totalTargetMass = rawDoughMass * scaleLossFactor;
-
-        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + maltPct;
-        let flourGrams = (totalTargetMass / totalPercentageMatrix) * 100;
-        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
-        let saltGrams = flourGrams * (saltPct / 100);
-        let yeastGrams = flourGrams * (yeastPct / 100);
-        let oilGrams = flourGrams * (oilPct / 100);
-        let maltGrams = flourGrams * (maltPct / 100);
-
-        updateDashboardHeader(selectedFlour, hydrationCalculated, availHours);
-        
-        let tableBody = document.getElementById("formulaTableBody");
-        tableBody.innerHTML = "";
-        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Pan)`, calculatedBallWeight);
-        appendRow(tableBody, "Flour", "100.00%", flourGrams);
-        
-        let warmBloomWater = flourGrams * 0.20; 
-        let coldMainWater = totalWaterGrams - warmBloomWater;
-
-        if (yeastType === "ADY") {
-            appendRow(tableBody, "Chilled Water (45°F-50°F Main Batch)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
-            appendRow(tableBody, "Warm Water (100°F-105°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
-        } else {
-            appendRow(tableBody, "Chilled Water (45°F-50°F Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
-        }
-
-        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
-        appendRow(tableBody, "Barley Malt Syrup", `${maltPct.toFixed(2)}%`, maltGrams);
-        appendRow(tableBody, "Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
-        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct.toFixed(2)}%`, yeastGrams);
-        
-        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + maltGrams;
-        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
-
-        const cheeseTable = document.getElementById("cheeseTableBody");
-        cheeseTable.innerHTML = "";
-        
-        // Detroit cheese: 2.5g per sq in total (40% Provolone Edge, 60% Mozzarella Center)
-        const detroitCheeseTotal = Math.round(area * 2.5);
-        const provoloneGrams = Math.round(detroitCheeseTotal * 0.4); 
-        const mozzGrams = detroitCheeseTotal - provoloneGrams; 
-        
-        appendRow(cheeseTable, "Provolone (Sliced thick, pressed against pan walls)", "", `${provoloneGrams}g`, true);
-        appendRow(cheeseTable, "Low-Moisture Mozzarella (Cubed, center focus)", "", `${mozzGrams}g`, true);
-
-        renderDetroitTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, maltGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude);
-    }
-
-    function calculateNY(selectedFlour, totalHours, altitude, yeastType, ovenType, ballCount, diamVal, timeDeltaDays, startIndex, cookIndex) {
-        const homeAlert = document.getElementById("homeOvenAlert");
-        const tavernAlert = document.getElementById("tavernAlert");
-        const altAlert = document.getElementById("altitudeAlert");
-        
-        homeAlert.classList.add("hidden");
-        document.getElementById("cheeseComponentsContainer").classList.remove("hidden");
-        tavernAlert.classList.add("hidden");
-
-        let area = 0;
-        let labelSize = diamVal;
-        const d = parseInt(diamVal);
-        area = Math.PI * (d / 2) * (d / 2);
-        labelSize = d + '"';
-
-        const gramsPerSqIn = 3.001; 
-        const calculatedBallWeight = Math.round(area * gramsPerSqIn);
-
-        let hydrationCalculated = 65.0; 
-        
-        let saltPct = 2.5;
-        let oilPct = 4.1; 
-        let maltPct = 1.6;
-
-        let yeastPct = 0.43; // 24h baseline
-        
-        // Adaptive yeast scaling based on timeline selected
-        if (timeDeltaDays === 0) {
-            yeastPct = 1.0; 
-        } else if (timeDeltaDays === 1) {
-            yeastPct = 0.5;
-        } else if (timeDeltaDays === 2) {
-            yeastPct = 0.35;
-        } else {
-            yeastPct = 0.25;
-        }
-
-        if (altitude === "high") {
-            yeastPct = yeastPct * 0.8; 
-            altAlert.innerHTML = `<strong>Altitude Adjustment:</strong> Yeast reduced to ${yeastPct.toFixed(2)}% to control fermentation rate in lower atmospheric pressure.`;
-            altAlert.classList.remove("hidden");
-        } else {
-            altAlert.classList.add("hidden");
-        }
-
-        if (yeastType === "IDY") yeastPct *= 0.75;
-        yeastPct = Math.round(yeastPct * 10000) / 10000;
-
-        let rawDoughMass = ballCount * calculatedBallWeight;
-        let totalPercentageMatrix = 100.0 + hydrationCalculated + saltPct + yeastPct + oilPct + maltPct;
-        let flourGrams = (rawDoughMass / totalPercentageMatrix) * 100;
-        
-        let totalWaterGrams = flourGrams * (hydrationCalculated / 100);
-        let saltGrams = flourGrams * (saltPct / 100);
-        let yeastGrams = flourGrams * (yeastPct / 100);
-        let oilGrams = flourGrams * (oilPct / 100);
-        let maltGrams = flourGrams * (maltPct / 100);
-
-        let hasT80 = document.querySelector('input[value="cm_bread_ow"]') && document.querySelector('input[value="cm_bread_ow"]').checked;
-        
-        updateDashboardHeader(selectedFlour, hydrationCalculated, totalHours);
-        
-        let tableBody = document.getElementById("formulaTableBody");
-        tableBody.innerHTML = "";
-        appendRefRow(tableBody, `Target Unit Weight (1x ${labelSize} Dough Ball)`, calculatedBallWeight);
-        
-        if (hasT80) {
-            appendRow(tableBody, `Bread Flour (${selectedFlour.brand} ${selectedFlour.name})`, "80.00%", flourGrams * 0.80);
-            appendRow(tableBody, `Old-World T80 Flour (Central Milling)`, "20.00%", flourGrams * 0.20);
-        } else {
-            appendRow(tableBody, `Flour (${selectedFlour.brand} ${selectedFlour.name})`, "100.00%", flourGrams);
-        }
-        
-        let warmBloomWater = 50.0;
-        if (warmBloomWater > totalWaterGrams) warmBloomWater = totalWaterGrams * 0.2;
-        let coldMainWater = totalWaterGrams - warmBloomWater;
-
-        if (yeastType === "ADY") {
-            appendRow(tableBody, "Main Mix Water (85°F)", `${((coldMainWater/flourGrams)*100).toFixed(2)}%`, coldMainWater);
-            appendRow(tableBody, "Warm Water (100°F Bloom)", `${((warmBloomWater/flourGrams)*100).toFixed(2)}%`, warmBloomWater);
-        } else {
-            appendRow(tableBody, "Water (85°F Direct Integration)", `${hydrationCalculated}%`, totalWaterGrams);
-        }
-
-        appendRow(tableBody, "Fine Sea Salt", `${saltPct.toFixed(2)}%`, saltGrams);
-        appendRow(tableBody, "Barley Malt Syrup", `${maltPct.toFixed(2)}%`, maltGrams);
-        appendRow(tableBody, "Extra Virgin Olive Oil", `${oilPct.toFixed(2)}%`, oilGrams);
-        appendRow(tableBody, `Yeast (${yeastType})`, `${yeastPct.toFixed(2)}%`, yeastGrams);
-        
-        let totalVal = flourGrams + totalWaterGrams + saltGrams + yeastGrams + oilGrams + maltGrams;
-        appendTotalRow(tableBody, "Total Batch Weight", `${totalPercentageMatrix.toFixed(2)}%`, totalVal);
-
-        const cheeseTable = document.getElementById("cheeseTableBody");
-        cheeseTable.innerHTML = "";
-        
-        const totalCheeseGrams = Math.round(area * 1.44); 
-        appendRow(cheeseTable, "Low-Moisture Whole-Milk Mozzarella (Shredded)", "", `${totalCheeseGrams}g`, true);
-        appendRow(cheeseTable, "Pecorino Romano (Finely Grated, under the Mozzarella)", "", `15g`, true);
-
-        renderNYTimelineText(yeastType, altitude, timeDeltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams, maltGrams, diamVal, warmBloomWater, coldMainWater);
     }
 
     function renderDetroitTimelineText(yeastType, totalWaterGrams, yeastGrams, warmBloomWater, coldMainWater, saltGrams, oilGrams, maltGrams, ovenType, scheduleStartH, bakeH, actualHours, idealHours, availHours, diamVal, altitude) {
@@ -1714,73 +1767,6 @@
         `;
         
         timeline.appendChild(bakeContainer);
-    }
-
-    function formatTime(hourDecimal) {
-        let h = Math.floor(hourDecimal);
-        let m = Math.round((hourDecimal - h) * 60);
-        if (m >= 60) {
-            h += 1;
-            m -= 60;
-        }
-        let ampm = (h >= 12 && h < 24) ? "PM" : "AM";
-        let displayH = h % 12;
-        if (displayH === 0) displayH = 12;
-        let displayM = m.toString().padStart(2, "0");
-        return `${displayH}:${displayM} ${ampm}`;
-    }
-
-    function updateDashboardHeader(selectedFlour, hydration, hours) {
-        document.getElementById("calcHydration").innerText = `${hydration}%`;
-        document.getElementById("calcHours").innerText = `${hours} Hours`;
-        document.getElementById("flourSelectionBadge").innerHTML = `
-            <h3>System Selected Flour: <strong>[${selectedFlour.brand}] ${selectedFlour.name}</strong></h3>
-            <p style="font-size: 0.85rem; color: #92400e;">Specs: Protein ${selectedFlour.protein}% | Ash ${selectedFlour.ash}% | ${selectedFlour.notes}</p>
-        `;
-    }
-
-    function appendRow(parent, componentName, pctStr, gramsVal, isString=false) {
-        let tr = document.createElement("tr");
-        let valStr = isString ? gramsVal : (typeof gramsVal === "number" ? gramsVal.toFixed(1) + "g" : gramsVal);
-        let pctHtml = pctStr ? `<td style="font-family: monospace;">${pctStr}</td>` : '';
-        let colSpan = pctStr ? '' : 'colspan="2"';
-        tr.innerHTML = `
-            <td>${componentName}</td>
-            ${pctHtml}
-            <td ${colSpan} style="font-weight: 600; text-align: ${pctStr ? 'left' : 'right'};">${valStr}</td>
-        `;
-        parent.appendChild(tr);
-    }
-
-    function appendRefRow(parent, label, valGrams) {
-        let tr = document.createElement("tr");
-        tr.className = "table-ref-row";
-        tr.innerHTML = `
-            <td>${label}</td>
-            <td style="font-family: monospace;">---</td>
-            <td style="font-weight: 700;">${valGrams}g</td>
-        `;
-        parent.appendChild(tr);
-    }
-
-    function appendTotalRow(parent, label, pctStr, valGrams) {
-        let tr = document.createElement("tr");
-        tr.className = "total-row";
-        tr.innerHTML = `
-            <td>${label}</td>
-            <td style="font-family: monospace;">${pctStr}</td>
-            <td>${valGrams.toFixed(1)}g</td>
-        `;
-        parent.appendChild(tr);
-    }
-
-    function renderComponentTable(tableId, dataArray, multiplier) {
-        let tbody = document.getElementById(tableId);
-        tbody.innerHTML = "";
-        dataArray.forEach(item => {
-            let scaledMass = item.total_batch_g * multiplier;
-            appendRow(tbody, item.item, "", scaledMass);
-        });
     }
 
     function renderNeapolitanTimelineText(yeastType, altitude, deltaDays, startIndex, cookIndex, ovenType, totalWaterGrams, yeastGrams, saltGrams, oilGrams) {
@@ -1950,6 +1936,64 @@
         });
     }
 
+    function formatTime(hourDecimal) {
+        let h = Math.floor(hourDecimal);
+        let m = Math.round((hourDecimal - h) * 60);
+        if (m >= 60) {
+            h += 1;
+            m -= 60;
+        }
+        let ampm = (h >= 12 && h < 24) ? "PM" : "AM";
+        let displayH = h % 12;
+        if (displayH === 0) displayH = 12;
+        let displayM = m.toString().padStart(2, "0");
+        return `${displayH}:${displayM} ${ampm}`;
+    }
+
+    function updateDashboardHeader(selectedFlour, hydration, hours) {
+        document.getElementById("calcHydration").innerText = `${hydration.toFixed(1)}%`;
+        document.getElementById("calcHours").innerText = `${hours} Hours`;
+        document.getElementById("flourSelectionBadge").innerHTML = `
+            <h3>System Selected Flour: <strong>${selectedFlour.brand} ${selectedFlour.name}</strong></h3>
+            <p style="font-size: 0.85rem; color: #92400e;">Specs: Protein ${selectedFlour.protein}% | Ash ${selectedFlour.ash}% | <strong>W-Factor: ${selectedFlour.w}</strong> | ${selectedFlour.notes}</p>
+        `;
+    }
+
+    function appendRow(parent, componentName, pctStr, gramsVal, isString=false) {
+        let tr = document.createElement("tr");
+        let valStr = isString ? gramsVal : (typeof gramsVal === "number" ? gramsVal.toFixed(1) + "g" : gramsVal);
+        let pctHtml = pctStr ? `<td style="font-family: monospace;">${pctStr}</td>` : '';
+        let colSpan = pctStr ? '' : 'colspan="2"';
+        tr.innerHTML = `
+            <td>${componentName}</td>
+            ${pctHtml}
+            <td ${colSpan} style="font-weight: 600; text-align: ${pctStr ? 'left' : 'right'};">${valStr}</td>
+        `;
+        parent.appendChild(tr);
+    }
+
+    function appendRefRow(parent, label, valGrams) {
+        let tr = document.createElement("tr");
+        tr.className = "table-ref-row";
+        tr.innerHTML = `
+            <td>${label}</td>
+            <td style="font-family: monospace;">---</td>
+            <td style="font-weight: 700;">${valGrams}g</td>
+        `;
+        parent.appendChild(tr);
+    }
+
+    function appendTotalRow(parent, label, pctStr, valGrams) {
+        let tr = document.createElement("tr");
+        tr.className = "total-row";
+        tr.innerHTML = `
+            <td>${label}</td>
+            <td style="font-family: monospace;">${pctStr}</td>
+            <td>${valGrams.toFixed(1)}g</td>
+        `;
+        parent.appendChild(tr);
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
         populateDateDropdowns();
         renderFlourInventory();
@@ -1979,6 +2023,41 @@
         
         // Add event listener directly to inventory container checkboxes
         document.getElementById("inventoryContainer").addEventListener("change", calculateFormula);
+        
+        // Setup Image Download Logic
+        document.getElementById("downloadRecipeBtn").addEventListener("click", function() {
+            const btn = this;
+            const originalText = btn.innerText;
+            btn.innerText = "📸 Capturing...";
+            btn.style.opacity = "0.7";
+            btn.disabled = true;
+
+            // Target the entire output panel to include the header
+            const targetElement = document.getElementById("outputPanel");
+
+            html2canvas(targetElement, {
+                scale: 2, // High resolution for crisp text
+                backgroundColor: "#ffffff", // Ensure white background
+                useCORS: true // Prevents font rendering issues
+            }).then(canvas => {
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+                btn.disabled = false;
+
+                const link = document.createElement("a");
+                const styleName = document.getElementById("pizzaStyle").options[document.getElementById("pizzaStyle").selectedIndex].text;
+                const safeName = styleName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                
+                link.download = `TheDropInn_${safeName}_Recipe.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            }).catch(err => {
+                console.error("Error capturing recipe:", err);
+                btn.innerText = "Error - Try Again";
+                btn.style.opacity = "1";
+                btn.disabled = false;
+            });
+        });
         
         calculateFormula();
     });
