@@ -1,0 +1,89 @@
+/**
+ * Intelligent Pizza Dough Calculator - Kitchen Print Stylesheet
+ */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        font-size: 11pt !important;
+    }
+
+    .app-header {
+        padding: 10px 0 !important;
+        margin-bottom: 15px !important;
+        border-bottom: 2px solid #000000 !important;
+    }
+
+    .app-header h1 {
+        font-size: 18pt !important;
+        color: #000000 !important;
+    }
+
+    .brand-badge,
+    .controls-panel,
+    .tabs-navigation,
+    .kitchen-toolbar,
+    .modal-overlay,
+    .toast-popup,
+    .btn-text-action,
+    .inventory-controls-bar,
+    .app-footer {
+        display: none !important;
+    }
+
+    .layout-grid {
+        display: block !important;
+    }
+
+    .output-panel {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .tab-content-panel {
+        display: block !important;
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+    }
+
+    .table-card {
+        border: 1px solid #cccccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+
+    .formula-table th, .formula-table td {
+        padding: 6px 8px !important;
+        border-bottom: 1px solid #dddddd !important;
+        color: #000000 !important;
+    }
+
+    .stats-grid {
+        display: flex !important;
+        gap: 10px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .stat-card {
+        border: 1px solid #cccccc !important;
+        padding: 8px !important;
+        flex: 1;
+    }
+
+    .stat-val {
+        font-size: 14pt !important;
+        color: #000000 !important;
+    }
+
+    .timeline-step-card {
+        border: 1px solid #dddddd !important;
+        page-break-inside: avoid;
+        margin-bottom: 8px !important;
+    }
+
+    .step-checkbox {
+        display: none !important;
+    }
+}
